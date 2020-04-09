@@ -12,7 +12,7 @@ type (
 	}
 
 	Logger interface {
-		Printf(v ...interface{})
+		Printf(format string, v ...interface{})
 	}
 
 	Option func(exprDesc *ExpressionDescriptor)
@@ -44,16 +44,16 @@ func (e *ExpressionDescriptor) ToDescription(expr string, locale LocaleType) (de
 	return "", nil
 }
 
-func (e *ExpressionDescriptor) log(v ...interface{}) {
+func (e *ExpressionDescriptor) log(format string, v ...interface{}) {
 	if e.logger == nil {
 		return
 	}
-	e.logger.Printf(v...)
+	e.logger.Printf(format, v...)
 }
 
-func (e *ExpressionDescriptor) verbose(v ...interface{}) {
+func (e *ExpressionDescriptor) verbose(format string, v ...interface{}) {
 	if !e.isVerbose || e.logger == nil {
 		return
 	}
-	e.logger.Printf(v...)
+	e.logger.Printf(format, v...)
 }
