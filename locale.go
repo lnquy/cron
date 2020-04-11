@@ -261,4 +261,8 @@ var (
 	atX0SecondsPastTheMinuteGt20 LocaleKey = "atX0SecondsPastTheMinuteGt20"
 	atX0MinutesPastTheHourGt20   LocaleKey = "atX0MinutesPastTheHourGt20"
 	dayX0                        LocaleKey = "dayX0"
+	commaMonthX0ThroughMonthX1   LocaleKey = "commaMonthX0ThroughMonthX1"
+	commaOnlyInMonthX0           LocaleKey = "commaOnlyInMonthX0"
+	commaYearX0ThroughYearX1     LocaleKey = "commaYearX0ThroughYearX1"
+	commaOnlyInYearX0     LocaleKey = "commaOnlyInYearX0"
 )

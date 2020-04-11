@@ -7,7 +7,8 @@ import (
 	"github.com/lnquy/cron"
 )
 
-const expr = "* 9 LW JAN-OCT 1-5"
+// const expr = "0 * 9 LW JAN-OCT 1-5 2000-2099/10"
+const expr = "0 0 * LW JAN-OCT 1-5 2000-2099"
 
 func main() {
 	exprDesc, err := cron.NewDescriptor(

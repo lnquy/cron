@@ -83,9 +83,9 @@ func (e *ExpressionDescriptor) ToDescription(expr string, locale LocaleType) (de
 
 	var timeSegment = e.getTimeOfDayDescription(exprParts, locale)
 	var dayOfMonthDesc = e.getDayOfMonthDescription(exprParts, locale)
-	var monthDesc = e.getMonthDescription(exprParts)
-	var dayOfWeekDesc = e.getDayOfWeekDescription(exprParts)
-	var yearDesc = e.getYearDescription(exprParts)
+	var monthDesc = e.getMonthDescription(exprParts, locale)
+	var dayOfWeekDesc = e.getDayOfWeekDescription(exprParts, locale)
+	var yearDesc = e.getYearDescription(exprParts, locale)
 
 	desc = timeSegment + dayOfMonthDesc + dayOfWeekDesc + monthDesc + yearDesc
 	// TODO: desc = transformVerbosity(desc, e.isVerbose)
@@ -261,16 +261,139 @@ func (e *ExpressionDescriptor) getDayOfMonthDescription(exprParts []string, loc 
 	return desc
 }
 
-func (e *ExpressionDescriptor) getMonthDescription(exprParts []string) string {
-	return "*"
+func (e *ExpressionDescriptor) getMonthDescription(exprParts []string, loc LocaleType) string {
+	locale := e.getLocale(loc)
+	monthNames := locale.GetSlice(monthsOfTheYear)
+
+	desc := getSegmentDescription(
+		exprParts[4],
+		"",
+		func(s string) string {
+			sInt, _ := strconv.Atoi(s)
+			return monthNames[sInt-1]
+		},
+		func(s string) string {
+			sInt, _ := strconv.Atoi(s)
+			if sInt == 1 {
+				return "" // rather than "every 1 months" just return empty string
+			}
+			return fmt.Sprintf(locale.GetString(commaEveryX0Months), s)
+
+		},
+		func(s string) string {
+			if msg := locale.GetString(commaMonthX0ThroughMonthX1); msg != "" {
+				return msg
+			}
+			return locale.GetString(commaX0ThroughX1)
+		},
+		func(s string) string {
+			if msg := locale.GetString(commaOnlyInMonthX0); msg != "" {
+				return msg
+			}
+			return locale.GetString(commaOnlyInX0)
+		},
+		locale,
+	)
+
+	return desc
 }
 
-func (e *ExpressionDescriptor) getDayOfWeekDescription(exprParts []string) string {
-	return "*"
+func (e *ExpressionDescriptor) getDayOfWeekDescription(exprParts []string, loc LocaleType) string {
+	locale := e.getLocale(loc)
+	daysOfWeekNames := locale.GetSlice(daysOfTheWeek)
+
+	if exprParts[5] == "*" {
+		// DOW is specified as * so we will not generate a description and defer to DOM part.
+		// Otherwise, we could get a contradiction like "on day 1 of the month, every day"
+		// or a dupe description like "every day, every day".
+		return ""
+	}
+	desc := getSegmentDescription(
+		exprParts[5],
+		locale.GetString(commaEveryDay),
+		func(s string) string {
+			exp := s
+			if idx := strings.Index(s, "#"); idx > -1 {
+				exp = s[:idx+1] // TODO
+			} else if strings.Index(s, "l") > -1 {
+				exp = strings.Replace(exp, "l", "", -1)
+			}
+			expInt, _ := strconv.Atoi(exp)
+			return daysOfWeekNames[expInt]
+		},
+		func(s string) string {
+			sInt, _ := strconv.Atoi(s)
+			if sInt == 1 {
+				return "" // rather than "every 1 days" just return empty string
+			}
+			return fmt.Sprintf(locale.GetString(commaEveryX0DaysOfTheWeek), s)
+		},
+		func(s string) string {
+			return locale.GetString(commaX0ThroughX1)
+		},
+		func(s string) string {
+			format := ""
+			if idx := strings.Index(s, "#"); idx > -1 {
+				dowOfMonthNum := s[idx+1:]
+				dowOfMonthDesc := ""
+				switch dowOfMonthNum {
+				case "1":
+					dowOfMonthDesc = locale.GetString(first)
+				case "2":
+					dowOfMonthDesc = locale.GetString(second)
+				case "3":
+					dowOfMonthDesc = locale.GetString(third)
+				case "4":
+					dowOfMonthDesc = locale.GetString(fourth)
+				case "5":
+					dowOfMonthDesc = locale.GetString(fifth)
+				}
+				format = locale.GetString(commaOnThe) + dowOfMonthDesc + locale.GetString(spaceX0OfTheMonth)
+			} else if strings.Index(s, "l") > -1 {
+				format = locale.GetString(commaOnTheLastX0OfTheMonth)
+			} else {
+				// If both DOM and DOW are specified, the cron will execute at either time.
+				format = locale.GetString(commaAndOnX0)
+				if exprParts[3] == "*" {
+					format = locale.GetString(commaOnlyOnX0)
+				}
+			}
+
+			return format
+		},
+		locale,
+	)
+
+	return desc
 }
 
-func (e *ExpressionDescriptor) getYearDescription(exprParts []string) string {
-	return "*"
+func (e *ExpressionDescriptor) getYearDescription(exprParts []string, loc LocaleType) string {
+	locale := e.getLocale(loc)
+	desc := getSegmentDescription(
+		exprParts[6],
+		"",
+		func(s string) string {
+			return s // TODO
+		},
+		func(s string) string {
+			return fmt.Sprintf(locale.GetString(commaEveryX0Years), s)
+		},
+		func(s string) string {
+			if msg := locale.GetString(commaYearX0ThroughYearX1); msg != "" {
+				return msg
+			}
+			return locale.GetString(commaX0ThroughX1)
+		},
+		func(s string) string {
+			if msg := locale.GetString(commaOnlyInYearX0); msg != "" {
+				return msg
+			}
+			return locale.GetString(commaOnlyInX0)
+		},
+		locale,
+	)
+
+	return desc
 }
 
 func (e *ExpressionDescriptor) getLocale(loc LocaleType) Locale {
