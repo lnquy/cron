@@ -2,18 +2,19 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/lnquy/cron"
 )
 
-const expr = "0 9 * * 1-5"
+const expr = "* 9 * JAN 1-5"
 
 func main() {
 	exprDesc := cron.NewDescriptor(
 		cron.DayOfWeekStartsAtZero(),
 		cron.Use24HourTimeFormat(),
 		cron.Verbose(),
-		cron.SetLogger(&log.Logger{}),
+		cron.SetLogger(log.New(os.Stdout, "cron: ", log.LstdFlags)),
 		cron.SetLocales(cron.Locale_da, cron.Locale_de, cron.Locale_en, cron.Locale_es),
 	)
 

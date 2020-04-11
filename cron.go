@@ -1,5 +1,10 @@
 package cron
 
+import (
+	"fmt"
+	"strings"
+)
+
 type (
 	ExpressionDescriptor struct {
 		isVerbose          bool
@@ -26,7 +31,9 @@ func NewDescriptor(options ...Option) *ExpressionDescriptor {
 
 	// Init defaults
 	if exprDesc.parser == nil {
-		// TODO
+		exprDesc.parser = &cronParser{
+			isDOWStartsAtZero: exprDesc.isDOWStartsAtZero,
+		}
 	}
 	if len(exprDesc.locales) == 0 {
 		// TODO
@@ -40,7 +47,12 @@ func NewDescriptor(options ...Option) *ExpressionDescriptor {
 }
 
 func (e *ExpressionDescriptor) ToDescription(expr string, locale LocaleType) (desc string, err error) {
-	// TODO
+	var exprParts []string
+	if exprParts, err = e.parser.Parse(expr); err != nil {
+		return "", fmt.Errorf("failed to parse CRON expression: %w", err)
+	}
+
+	e.log("parsed: %v", strings.Join(exprParts, " | "))
 	return "", nil
 }
 

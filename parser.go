@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -22,17 +23,46 @@ var (
 
 var (
 	yearRegex = regexp.MustCompile(`^\d{4}$`)
+
+	everySecMinRegex = regexp.MustCompile(`[*/]`)
+	everyHourRegex   = regexp.MustCompile(`[*\-,/]`)
+
+	rangeRegex = regexp.MustCompile(`^[*\-,]`)
+
+	invalidCharsDOWDOMRegex = regexp.MustCompile(`[a-km-vx-zA-KM-VX-Z]`)
 )
 
 var (
 	zeroRune  int32 = 48
 	oneRune   int32 = 49
-	twoRune   int32 = 50
-	threeRune int32 = 51
-	fourRune  int32 = 52
-	fiveRune  int32 = 53
-	sixRune   int32 = 54
 	sevenRune int32 = 55
+)
+
+var (
+	days = map[string]int{
+		"sun": 0,
+		"mon": 1,
+		"tue": 2,
+		"wed": 3,
+		"thu": 4,
+		"fri": 5,
+		"sat": 6,
+	}
+
+	months = map[string]int{
+		"jan": 1,
+		"feb": 2,
+		"mar": 3,
+		"apr": 4,
+		"may": 5,
+		"jun": 6,
+		"jul": 7,
+		"aug": 8,
+		"sep": 9,
+		"oct": 10,
+		"nov": 11,
+		"dec": 12,
+	}
 )
 
 type (
@@ -51,15 +81,22 @@ func (p *cronParser) Parse(expr string) (exprParts []string, err error) {
 		return nil, fmt.Errorf("failed to extract expression parts: %w", err)
 	}
 
-	// TODO
-	return nil, nil
+	if err = p.normalize(exprParts); err != nil {
+		return nil, fmt.Errorf("failed to normalize expression parts: %w", err)
+	}
+
+	if err = p.validate(exprParts); err != nil {
+		return nil, fmt.Errorf("invalid CRON expression: %w", err)
+	}
+	return exprParts, nil
 }
 
 func (p *cronParser) extractExprParts(expr string) (exprParts []string, err error) {
-	if expr == "" {
+	if strings.TrimSpace(expr) == "" {
 		return nil, EmptyExprError
 	}
 
+	expr = strings.ToLower(expr)
 	exprParts = make([]string, 7, 7)
 	parts := strings.Fields(expr)
 
@@ -138,7 +175,7 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 			if c != sevenRune {
 				continue
 			}
-			c = oneRune // Accept 7 means Sunday too
+			c = zeroRune // Accept 7 means Sunday too
 		} else {
 			if c == zeroRune {
 				return fmt.Errorf("day of week starts at 1, must be from 1 to 7: %w", InvalidExprDayOfWeekError)
@@ -152,20 +189,89 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 	dayOfWeek = string(dowRunes)
 
 	// Convert DOW 'L' to '6' (Saturday)
-	if dayOfWeek == "L" {
+	if dayOfWeek == "l" {
 		dayOfWeek = "6"
 	}
 
-	if strings.Index(dayOfMonth, "W") > -1 &&
+	if strings.Index(dayOfMonth, "w") > -1 &&
 		(strings.Index(dayOfMonth, ",") > -1 || strings.Index(dayOfMonth, "-") > -1) {
 		return fmt.Errorf("the 'W' character can be specified only when the day-of-month is a single day, not a range or list of days: %w", InvalidExprDayOfMonthError)
 	}
 
-	// TODO: WIP
+	// Convert DOW SUN-SAT format to 0-6 format
+	for k, v := range days {
+		dayOfWeek = strings.Replace(dayOfWeek, k, strconv.Itoa(v), 1)
+	}
+
+	// Convert DON JAN-DEC format to 1-12 format
+	for k, v := range months {
+		month = strings.Replace(month, k, strconv.Itoa(v), 1)
+	}
+
+	if second == "0" {
+		second = ""
+	}
+
+	// If time interval or * (every) is specified for seconds or minutes and hours part is
+	// single item, make it a "self-range" so the expression can be interpreted as
+	// an interval 'between' range.
+	// This will allow us to easily interpret an hour part as 'between' a second or minute duration.
+	// For example:
+	//    0-20/3 9 * * * => 0-20/3 9-9 * * * (9 => 9-9) => Every 3 minutes, minutes 0 through 20
+	//       past the hour, between 09:00 AM and 09:59 AM
+	//    */5 3 * * * => */5 3-3 * * * (3 => 3-3) => Every 5 minutes, between 03:00 AM and 03:59 AM
+	if !everyHourRegex.MatchString(hour) &&
+		(everySecMinRegex.MatchString(second) || everySecMinRegex.MatchString(minute)) {
+		hour += "-" + hour
+	}
+
+	exprParts[0] = second
+	exprParts[1] = minute
+	exprParts[2] = hour
+	exprParts[3] = dayOfMonth
+	exprParts[4] = month
+	exprParts[5] = dayOfWeek
+	exprParts[6] = year
+
+	// Loop through all parts and apply global normalization
+	for i := range exprParts {
+		if exprParts[i] == "*/1" {
+			exprParts[i] = "*"
+		}
+
+		// Convert Month,DOW,Year step values with a starting value (i.e. not '*') to between expressions.
+		// This allows us to reuse the between expression handling for step values.
+		// For example:
+		//   - month part '3/2' will be converted to '3-12/2' (every 2 months between March and December)
+		//   - DOW part '3/2' will be converted to '3-6/2' (every 2 days between Tuesday and Saturday)
+		if strings.Index(exprParts[i], "/") != -1 && !rangeRegex.MatchString(exprParts[i]) {
+			var stepRangeThrough string
+			switch i {
+			case 4: // Month
+				stepRangeThrough = "12"
+			case 5: // Day of week
+				stepRangeThrough = "6"
+			case 6: // Year
+				stepRangeThrough = "9999"
+			}
+
+			if stepRangeThrough == "" {
+				continue
+			}
+			parts := strings.Split(exprParts[i], "/")
+			exprParts[i] = fmt.Sprintf("%s-%s/%s", parts[0], stepRangeThrough, parts[1])
+		}
+	}
 
 	return nil
 }
 
-func isNumberChar(c int32) bool {
-	return c >= 48 && c <= 57
+func (p *cronParser) validate(exprParts []string) (err error) {
+	if invalidCharsDOWDOMRegex.MatchString(exprParts[3]) { // DOM
+		return fmt.Errorf("DOM contains invalid values: %w", InvalidExprDayOfMonthError)
+	}
+	if invalidCharsDOWDOMRegex.MatchString(exprParts[5]) { // DOW
+		return fmt.Errorf("DOW contains invalid values: %w", InvalidExprDayOfWeekError)
+	}
+	return nil
 }
