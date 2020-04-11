@@ -2,12 +2,16 @@ package cron
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
 var (
 	specialChars = []rune{'/', '-', ',', '*'}
+
+	weekdaysNumberRegex = regexp.MustCompile(`(\d{1,2}w)|(w\d{1,2})`)
+	lastDayOffsetRegex  = regexp.MustCompile(`L-(\d{1,2})`)
 )
 
 func containsAny(s string, matches []rune) bool {
@@ -59,7 +63,7 @@ func NewDescriptor(options ...Option) (exprDesc *ExpressionDescriptor, err error
 		exprDesc.locales = make(map[LocaleType]Locale)
 	}
 	if _, ok := exprDesc.locales[Locale_en]; !ok {
-		localeLoader, err := NewLocalLoaders(Locale_en)
+		localeLoader, err := NewLocaleLoaders(Locale_en)
 		if err != nil {
 			return nil, fmt.Errorf("failed to init default locale EN: %w", err)
 		}
@@ -78,7 +82,7 @@ func (e *ExpressionDescriptor) ToDescription(expr string, locale LocaleType) (de
 	e.log("parsed: %v", strings.Join(exprParts, " | "))
 
 	var timeSegment = e.getTimeOfDayDescription(exprParts, locale)
-	var dayOfMonthDesc = e.getDayOfMonthDescription(exprParts)
+	var dayOfMonthDesc = e.getDayOfMonthDescription(exprParts, locale)
 	var monthDesc = e.getMonthDescription(exprParts)
 	var dayOfWeekDesc = e.getDayOfWeekDescription(exprParts)
 	var yearDesc = e.getYearDescription(exprParts)
@@ -192,8 +196,69 @@ func (e *ExpressionDescriptor) getSecondDescription(exprParts []string, locale L
 	return desc
 }
 
-func (e *ExpressionDescriptor) getDayOfMonthDescription(exprParts []string) string {
-	return "*"
+func (e *ExpressionDescriptor) getDayOfMonthDescription(exprParts []string, loc LocaleType) string {
+	desc := ""
+	dom := exprParts[3]
+	locale := e.getLocale(loc)
+
+	switch dom {
+	case "l":
+		desc = locale.GetString(commaOnTheLastDayOfTheMonth)
+	case "wl":
+		fallthrough
+	case "lw":
+		desc = locale.GetString(commaOnTheLastWeekdayOfTheMonth)
+	default:
+		weekdaysNumberMatches := weekdaysNumberRegex.FindAllString(dom, -1)
+		if len(weekdaysNumberMatches) > 0 {
+			dayNumber, _ := strconv.Atoi(strings.Replace(weekdaysNumberMatches[0], "w", "", -1))
+			dayStr := ""
+			if dayNumber == 1 {
+				dayStr = locale.GetString(firstWeekday)
+			} else {
+				dayStr = fmt.Sprintf(locale.GetString(weekdayNearestDayX0), strconv.Itoa(dayNumber))
+			}
+			desc = fmt.Sprintf(locale.GetString(commaOnTheX0OfTheMonth), dayStr)
+			break
+		}
+
+		// Handle "last day offset" (i.e. L-5:  "5 days before the last day of the month")
+		lastDayOffsetMatches := lastDayOffsetRegex.FindAllString(dom, -1)
+		if len(lastDayOffsetMatches) > 0 {
+			desc = fmt.Sprintf(locale.GetString(commaDaysBeforeTheLastDayOfTheMonth), lastDayOffsetMatches[0]) // TODO: cronstrue used 1
+			break
+		}
+		// * dayOfMonth and dayOfWeek specified so use dayOfWeek verbiage instead
+		if dom == "*" && exprParts[5] != "*" {
+			return ""
+		}
+		desc = getSegmentDescription(
+			dom,
+			locale.GetString(commaEveryDay),
+			func(s string) string {
+				if s == "l" {
+					return locale.GetString(lastDay)
+				}
+				return fmt.Sprintf(locale.GetString(dayX0), s) // TODO
+			},
+			func(s string) string {
+				if s == "1" {
+					return locale.GetString(commaEveryDay)
+				}
+				return locale.GetString(commaEveryX0Days)
+			},
+			func(s string) string {
+				return locale.GetString(commaBetweenDayX0AndX1OfTheMonth)
+			},
+			func(s string) string {
+				return locale.GetString(commaOnDayX0OfTheMonth)
+			},
+			locale,
+		)
+		break
+	}
+
+	return desc
 }
 
 func (e *ExpressionDescriptor) getMonthDescription(exprParts []string) string {

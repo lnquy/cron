@@ -26,7 +26,7 @@ func Use24HourTimeFormat() Option {
 
 func SetLocales(locales ...LocaleType) Option {
 	return func(exprDesc *ExpressionDescriptor) {
-		loaders, err := NewLocalLoaders(locales...)
+		loaders, err := NewLocaleLoaders(locales...)
 		if err != nil {
 			exprDesc.log("failed to init locale loaders: %s", err)
 		}
@@ -35,7 +35,7 @@ func SetLocales(locales ...LocaleType) Option {
 			exprDesc.locales = make(map[LocaleType]Locale)
 		}
 		for _, loader := range loaders {
-			exprDesc.locales[loader.Type] = loader
+			exprDesc.locales[loader.GetLocaleType()] = loader
 		}
 	}
 }

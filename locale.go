@@ -68,18 +68,20 @@ type (
 	LocaleKey  string
 
 	Locale interface {
+		GetLocaleType() (typ LocaleType)
+		GetBool(key LocaleKey) (value bool)
 		GetString(key LocaleKey) (value string)
-		GetSlice(key string) (values []interface{})
+		GetSlice(key LocaleKey) (values []string)
 	}
 
 	LocaleLoader struct {
-		Type LocaleType
-		Data map[string]interface{}
+		localeType LocaleType
+		data       map[string]interface{}
 	}
 )
 
-func NewLocalLoaders(types ...LocaleType) (loaders []*LocaleLoader, err error) {
-	loaders = make([]*LocaleLoader, 0)
+func NewLocaleLoaders(types ...LocaleType) (loaders []Locale, err error) {
+	loaders = make([]Locale, 0)
 	for _, typ := range types {
 		got, err := newLocaleLoader(typ)
 		if err != nil {
@@ -90,7 +92,7 @@ func NewLocalLoaders(types ...LocaleType) (loaders []*LocaleLoader, err error) {
 	return loaders, nil
 }
 
-func newLocaleLoader(typ LocaleType) (loaders []*LocaleLoader, err error) {
+func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 	var rawData string
 	localeMap := make(map[string]interface{}, 60)
 	switch typ {
@@ -141,7 +143,7 @@ func newLocaleLoader(typ LocaleType) (loaders []*LocaleLoader, err error) {
 	// case Locale_zh_TW:
 	// 	rawData = i18n.Locale_zh_TW
 	case LocaleAll:
-		loaders = make([]*LocaleLoader, 0, len(allLocales))
+		loaders = make([]Locale, 0, len(allLocales))
 		for _, l := range allLocales {
 			got, err := newLocaleLoader(l)
 			if err != nil {
@@ -158,22 +160,51 @@ func newLocaleLoader(typ LocaleType) (loaders []*LocaleLoader, err error) {
 	if err = json.Unmarshal([]byte(rawData), &localeMap); err != nil {
 		return nil, fmt.Errorf("failed to decode locale map, locale=%s: %w", typ, err)
 	}
-	loaders = []*LocaleLoader{
-		{Type: typ, Data: localeMap},
+
+	// Handle slice data
+	type sliceData struct {
+		DaysOfTheWeek   []string `json:"daysOfTheWeek"`
+		MonthsOfTheYear []string `json:"monthsOfTheYear"`
+	}
+	sld := sliceData{}
+	if err = json.Unmarshal([]byte(rawData), &sld); err != nil {
+		return nil, fmt.Errorf("failed to decode slice locale map, locale=%s: %w", typ, err)
+	}
+	localeMap[string(daysOfTheWeek)] = sld.DaysOfTheWeek
+	localeMap[string(monthsOfTheYear)] = sld.MonthsOfTheYear
+
+	loaders = []Locale{
+		&LocaleLoader{localeType: typ, data: localeMap},
 	}
 	return loaders, nil
 }
 
+func (l *LocaleLoader) GetLocaleType() (typ LocaleType) {
+	return l.localeType
+}
+
+func (l *LocaleLoader) GetBool(key LocaleKey) (value bool) {
+	casted, ok := l.data[string(key)].(bool)
+	if !ok {
+		return false
+	}
+	return casted
+}
+
 func (l *LocaleLoader) GetString(key LocaleKey) (value string) {
-	casted, ok := l.Data[string(key)].(string)
+	casted, ok := l.data[string(key)].(string)
 	if !ok {
 		return ""
 	}
 	return casted
 }
 
-func (l *LocaleLoader) GetSlice(key string) (values []interface{}) {
-	return nil // TODO
+func (l *LocaleLoader) GetSlice(key LocaleKey) (values []string) {
+	casted, ok := l.data[string(key)].([]string)
+	if !ok {
+		return nil
+	}
+	return casted
 }
 
 var (
@@ -225,8 +256,9 @@ var (
 	daysOfTheWeek                              LocaleKey = "daysOfTheWeek"
 	monthsOfTheYear                            LocaleKey = "monthsOfTheYear"
 
-	pm                            LocaleKey = "pm"
-	am                            LocaleKey = "am"
+	pm                           LocaleKey = "pm"
+	am                           LocaleKey = "am"
 	atX0SecondsPastTheMinuteGt20 LocaleKey = "atX0SecondsPastTheMinuteGt20"
-	atX0MinutesPastTheHourGt20 LocaleKey = "atX0MinutesPastTheHourGt20"
+	atX0MinutesPastTheHourGt20   LocaleKey = "atX0MinutesPastTheHourGt20"
+	dayX0                        LocaleKey = "dayX0"
 )
