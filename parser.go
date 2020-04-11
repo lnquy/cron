@@ -9,9 +9,7 @@ import (
 )
 
 var (
-	EmptyExprError   = errors.New("expression is empty")
 	InvalidExprError = errors.New("invalid expression")
-
 	InvalidExprSecondError     = errors.New("invalid expression, second part")
 	InvalidExprMinuteError     = errors.New("invalid expression, minute part")
 	InvalidExprHourError       = errors.New("invalid expression, hour part")
@@ -94,7 +92,7 @@ func (p *cronParser) Parse(expr string) (exprParts []string, err error) {
 
 func (p *cronParser) extractExprParts(expr string) (exprParts []string, err error) {
 	if strings.TrimSpace(expr) == "" {
-		return nil, EmptyExprError
+		return nil, InvalidExprError
 	}
 
 	expr = strings.ToLower(expr)
@@ -259,14 +257,15 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 			if stepRangeThrough == "" {
 				continue
 			}
-			parts := strings.Split(exprParts[i], "/")
-			exprParts[i] = fmt.Sprintf("%s-%s/%s", parts[0], stepRangeThrough, parts[1])
+			idx := strings.Index(exprParts[i], "/")
+			exprParts[i] = fmt.Sprintf("%s-%s/%s", exprParts[i][:idx], stepRangeThrough, exprParts[i][idx:])
 		}
 	}
 
 	return nil
 }
 
+// TODO: Regex is really expensive here. Improve it
 func (p *cronParser) validate(exprParts []string) (err error) {
 	// Second
 	matches := numberRegex.FindAllString(exprParts[0], -1)

@@ -21,7 +21,7 @@ func TestCronParser_Parse(t *testing.T) {
 			name:     "should failed on empty",
 			inExpr:   "   ",
 			outExprs: nil,
-			outErr:   EmptyExprError,
+			outErr:   InvalidExprError,
 		}, {
 			name:     "should parse cron with multiple spaces between parts",
 			inExpr:   "30  2  *    *  *",
@@ -271,5 +271,22 @@ func TestCronParser_Parse(t *testing.T) {
 		}
 
 		testFunc() // Otherwise test with default isDOWStartsAtZero
+	}
+}
+
+var _parsed []string
+
+func BenchmarkCronParser_Parse(b *testing.B) {
+	b.StopTimer()
+	parser := &cronParser{isDOWStartsAtZero: true}
+	expr := "0/5 1,5,10,15 */2 L JAN-OCT 1-5/2 2000-2050/10"
+	var err error
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		_parsed, err = parser.Parse(expr)
+		if err != nil {
+			b.Fatalf("expected nil, got error: %s", err)
+		}
 	}
 }
