@@ -87,8 +87,8 @@ func TestCronParser_Parse(t *testing.T) {
 			outErr:   nil,
 		}, {
 			name:     "should convert 1/ to */",
-			inExpr:   "3 * * 1/5 1/5 1/2 1/1000",
-			outExprs: []string{"3", "*", "*", "*/5", "*/5", "*/2", "*/1000"},
+			inExpr:   "3 * * 1/5 1/5 1/2 1/10",
+			outExprs: []string{"3", "*", "*", "*/5", "*/5", "*/2", "*/10"},
 			outErr:   nil,
 		}, {
 			name:     "should use 7 as Sunday when DOWStartsAtZero is true",
@@ -139,23 +139,100 @@ func TestCronParser_Parse(t *testing.T) {
 			outErr:   nil,
 		}, {
 			name:     "should normalize to range",
-			inExpr:   "5 * * 3/5 2/5 2/2 2000/1000",
-			outExprs: []string{"5", "*", "*", "3/5", "2-12/5", "2-6/2", "2000-9999/1000"},
+			inExpr:   "5 * * 3/5 2/5 2/2 2000/10",
+			outExprs: []string{"5", "*", "*", "3/5", "2-12/5", "2-6/2", "2000-2099/10"},
 			outErr:   nil,
 		},
 
 		// validate
 		{
-			name:     "should error if DOW part is not valid",
+			name:     "should error if second is invalid 2",
+			inExpr:   "60 * * * * * *",
+			outExprs: nil,
+			outErr:   InvalidExprSecondError,
+		}, {
+			name:     "should error if second is invalid 3",
+			inExpr:   "9223372036854775808 * * * * * *",
+			outExprs: nil,
+			outErr:   InvalidExprSecondError,
+		}, {
+			name:     "should error if minute is invalid 2",
+			inExpr:   "* 60 * * * * *",
+			outExprs: nil,
+			outErr:   InvalidExprMinuteError,
+		}, {
+			name:     "should error if hour is invalid 2",
+			inExpr:   "* * 24 * * * *",
+			outExprs: nil,
+			outErr:   InvalidExprHourError,
+		}, {
+			name:     "should error if DOM is invalid 2",
+			inExpr:   "* * * 32 * * *",
+			outExprs: nil,
+			outErr:   InvalidExprDayOfMonthError,
+		}, {
+			name:     "should error if DOM contains invalid characters",
+			inExpr:   "* * LX * *",
+			outExprs: nil,
+			outErr:   InvalidExprDayOfMonthError,
+		}, {
+			name:     "should error if month is invalid 2",
+			inExpr:   "* * * * 13 * *",
+			outExprs: nil,
+			outErr:   InvalidExprMonthError,
+		}, {
+			name:     "should error if DOW is invalid 2",
+			inExpr:   "* * * * * 8 *",
+			outExprs: nil,
+			outErr:   InvalidExprDayOfWeekError,
+		}, {
+			name:     "should error if DOW contains invalid characters",
 			inExpr:   "* * * * MO",
 			outExprs: nil,
 			outErr:   InvalidExprDayOfWeekError,
 		}, {
-			name:     "should error if DOM part is not valid",
-			inExpr:   "* * LX * *",
+			name:     "should error if year is invalid 1",
+			inExpr:   "* * * * * * 0",
 			outExprs: nil,
-			outErr:   InvalidExprDayOfMonthError,
+			outErr:   InvalidExprYearError,
+		}, {
+			name:     "should error if year is invalid 2",
+			inExpr:   "* * * * * * 2100",
+			outExprs: nil,
+			outErr:   InvalidExprYearError,
 		},
+		// Cannot test due to no reliable way to detect negative number in cron expression
+		// {
+		// 	name:     "should error if second is invalid 1",
+		// 	inExpr:   "-1 * * * * * *",
+		// 	outExprs: nil,
+		// 	outErr:   InvalidExprSecondError,
+		// }, {
+		// 	name:     "should error if minute is invalid 1",
+		// 	inExpr:   "* -1 * * * * *",
+		// 	outExprs: nil,
+		// 	outErr:   InvalidExprMinuteError,
+		// },{
+		// 	name:     "should error if hour is invalid 1",
+		// 	inExpr:   "* * -1 * * * *",
+		// 	outExprs: nil,
+		// 	outErr:   InvalidExprHourError,
+		// },{
+		// 	name:     "should error if DOM is invalid 1",
+		// 	inExpr:   "* * * -1 * * *",
+		// 	outExprs: nil,
+		// 	outErr:   InvalidExprDayOfMonthError,
+		// },{
+		// 	name:     "should error if month is invalid 1",
+		// 	inExpr:   "* * * * 0 * *",
+		// 	outExprs: nil,
+		// 	outErr:   InvalidExprMonthError,
+		// }, {
+		// 	name:     "should error if DOW is invalid 1",
+		// 	inExpr:   "* * * * * -1 *",
+		// 	outExprs: nil,
+		// 	outErr:   InvalidExprDayOfWeekError,
+		// },
 	}
 
 	parser := cronParser{isDOWStartsAtZero: true}
