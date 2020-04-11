@@ -1,5 +1,12 @@
 package cron
 
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/lnquy/cron/i18n"
+)
+
 const (
 	LocaleAll LocaleType = "all"
 
@@ -58,7 +65,168 @@ var (
 
 type (
 	LocaleType string
+	LocaleKey  string
 
 	Locale interface {
+		GetString(key LocaleKey) (value string)
+		GetSlice(key string) (values []interface{})
 	}
+
+	LocaleLoader struct {
+		Type LocaleType
+		Data map[string]interface{}
+	}
+)
+
+func NewLocalLoaders(types ...LocaleType) (loaders []*LocaleLoader, err error) {
+	loaders = make([]*LocaleLoader, 0)
+	for _, typ := range types {
+		got, err := newLocaleLoader(typ)
+		if err != nil {
+			return nil, fmt.Errorf("failed to init locale for %s", typ)
+		}
+		loaders = append(loaders, got...)
+	}
+	return loaders, nil
+}
+
+func newLocaleLoader(typ LocaleType) (loaders []*LocaleLoader, err error) {
+	var rawData string
+	localeMap := make(map[string]interface{}, 60)
+	switch typ {
+	// case Locale_cs:
+	// 	rawData = i18n.Locale_cs
+	// case Locale_da:
+	// 	rawData = i18n.Locale_da
+	// case Locale_de:
+	// 	rawData = i18n.Locale_de
+	case Locale_en:
+		rawData = i18n.Locale_en
+	// 	case Locale_es:
+	// 		rawData = i18n.Locale_es
+	// 	case Locale_fi:
+	// 		rawData = i18n.Locale_fi
+	// 	case Locale_fr:
+	// 		rawData = i18n.Locale_fr
+	// 	case Locale_he:
+	// 		rawData = i18n.Locale_he
+	// 	case Locale_it:
+	// 		rawData = i18n.Locale_it
+	// 	case Locale_ja:
+	// 		rawData = i18n.Locale_ja
+	// 	case Locale_ko:
+	// 		rawData = i18n.Locale_ko
+	// 	case Locale_nb:
+	// 		rawData = i18n.Locale_nb
+	// 	case Locale_pt_BR:
+	// 		rawData = i18n.Locale_pt_BR
+	// 	case Locale_ro:
+	// 		rawData = i18n.Locale_ro
+	// 	case Locale_ru:
+	// 		rawData = i18n.Locale_ru
+	// 	case Locale_sk:
+	// 		rawData = i18n.Locale_sk
+	// 	case Locale_sl:
+	// 		rawData = i18n.Locale_sl
+	// 	case Locale_sv:
+	// 		rawData = i18n.Locale_sv
+	// 	case Locale_sw:
+	// 		rawData = i18n.Locale_sw
+	// 	case Locale_tr:
+	// 		rawData = i18n.Locale_tr
+	// 	case Locale_uk:
+	// 		rawData = i18n.Locale_uk
+	// 	case Locale_zh_CN:
+	// 		rawData = i18n.Locale_zh_CN
+	// case Locale_zh_TW:
+	// 	rawData = i18n.Locale_zh_TW
+	case LocaleAll:
+		loaders = make([]*LocaleLoader, 0, len(allLocales))
+		for _, l := range allLocales {
+			got, err := newLocaleLoader(l)
+			if err != nil {
+				return nil, fmt.Errorf("failed to init locale loader for %s: %w", l, err)
+			}
+			loaders = append(loaders, got...)
+		}
+		return loaders, nil
+	default:
+		return nil, fmt.Errorf("unsupported locale: %s", typ)
+	}
+
+	// Load a single locale
+	if err = json.Unmarshal([]byte(rawData), &localeMap); err != nil {
+		return nil, fmt.Errorf("failed to decode locale map, locale=%s: %w", typ, err)
+	}
+	loaders = []*LocaleLoader{
+		{Type: typ, Data: localeMap},
+	}
+	return loaders, nil
+}
+
+func (l *LocaleLoader) GetString(key LocaleKey) (value string) {
+	casted, ok := l.Data[string(key)].(string)
+	if !ok {
+		return ""
+	}
+	return casted
+}
+
+func (l *LocaleLoader) GetSlice(key string) (values []interface{}) {
+	return nil // TODO
+}
+
+var (
+	anErrorOccurredWhenGeneratingTheExpression LocaleKey = "anErrorOccurredWhenGeneratingTheExpression"
+	everyMinute                                LocaleKey = "everyMinute"
+	everyHour                                  LocaleKey = "everyHour"
+	atSpace                                    LocaleKey = "atSpace"
+	everyMinuteBetweenX0AndX1                  LocaleKey = "everyMinuteBetweenX0AndX1"
+	at                                         LocaleKey = "at"
+	spaceAnd                                   LocaleKey = "spaceAnd"
+	everySecond                                LocaleKey = "everySecond"
+	everyX0Seconds                             LocaleKey = "everyX0Seconds"
+	secondsX0ThroughX1PastTheMinute            LocaleKey = "secondsX0ThroughX1PastTheMinute"
+	atX0SecondsPastTheMinute                   LocaleKey = "atX0SecondsPastTheMinute"
+	everyX0Minutes                             LocaleKey = "everyX0Minutes"
+	minutesX0ThroughX1PastTheHour              LocaleKey = "minutesX0ThroughX1PastTheHour"
+	atX0MinutesPastTheHour                     LocaleKey = "atX0MinutesPastTheHour"
+	everyX0Hours                               LocaleKey = "everyX0Hours"
+	betweenX0AndX1                             LocaleKey = "betweenX0AndX1"
+	atX0                                       LocaleKey = "atX0"
+	commaEveryDay                              LocaleKey = "commaEveryDay"
+	commaEveryX0DaysOfTheWeek                  LocaleKey = "commaEveryX0DaysOfTheWeek"
+	commaX0ThroughX1                           LocaleKey = "commaX0ThroughX1"
+	first                                      LocaleKey = "first"
+	second                                     LocaleKey = "second"
+	third                                      LocaleKey = "third"
+	fourth                                     LocaleKey = "fourth"
+	fifth                                      LocaleKey = "fifth"
+	commaOnThe                                 LocaleKey = "commaOnThe"
+	spaceX0OfTheMonth                          LocaleKey = "spaceX0OfTheMonth"
+	lastDay                                    LocaleKey = "lastDay"
+	commaOnTheLastX0OfTheMonth                 LocaleKey = "commaOnTheLastX0OfTheMonth"
+	commaOnlyOnX0                              LocaleKey = "commaOnlyOnX0"
+	commaAndOnX0                               LocaleKey = "commaAndOnX0"
+	commaEveryX0Months                         LocaleKey = "commaEveryX0Months"
+	commaOnlyInX0                              LocaleKey = "commaOnlyInX0"
+	commaOnTheLastDayOfTheMonth                LocaleKey = "commaOnTheLastDayOfTheMonth"
+	commaOnTheLastWeekdayOfTheMonth            LocaleKey = "commaOnTheLastWeekdayOfTheMonth"
+	commaDaysBeforeTheLastDayOfTheMonth        LocaleKey = "commaDaysBeforeTheLastDayOfTheMonth"
+	firstWeekday                               LocaleKey = "firstWeekday"
+	weekdayNearestDayX0                        LocaleKey = "weekdayNearestDayX0"
+	commaOnTheX0OfTheMonth                     LocaleKey = "commaOnTheX0OfTheMonth"
+	commaEveryX0Days                           LocaleKey = "commaEveryX0Days"
+	commaBetweenDayX0AndX1OfTheMonth           LocaleKey = "commaBetweenDayX0AndX1OfTheMonth"
+	commaOnDayX0OfTheMonth                     LocaleKey = "commaOnDayX0OfTheMonth"
+	commaEveryHour                             LocaleKey = "commaEveryHour"
+	commaEveryX0Years                          LocaleKey = "commaEveryX0Years"
+	commaStartingX0                            LocaleKey = "commaStartingX0"
+	daysOfTheWeek                              LocaleKey = "daysOfTheWeek"
+	monthsOfTheYear                            LocaleKey = "monthsOfTheYear"
+
+	pm                            LocaleKey = "pm"
+	am                            LocaleKey = "am"
+	atX0SecondsPastTheMinuteGt20 LocaleKey = "atX0SecondsPastTheMinuteGt20"
+	atX0MinutesPastTheHourGt20 LocaleKey = "atX0MinutesPastTheHourGt20"
 )
