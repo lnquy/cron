@@ -4,6 +4,7 @@ package i18n
 const Locale_fr = `
 {
     "confSetPeriodBeforeTime": false,
+
     "atX0SecondsPastTheMinuteGt20": "",
     "atX0MinutesPastTheHourGt20": "",
     "commaMonthX0ThroughMonthX1": "",

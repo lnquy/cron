@@ -23,6 +23,7 @@ const (
 	Locale_ja    LocaleType = "ja"
 	Locale_ko    LocaleType = "ko"
 	Locale_nb    LocaleType = "nb"
+	Locale_nl    LocaleType = "nl"
 	Locale_pt_BR LocaleType = "pt_BR"
 	Locale_ro    LocaleType = "ro"
 	Locale_ru    LocaleType = "ru"
@@ -43,9 +44,10 @@ var (
 		Locale_de,
 		Locale_en,
 		Locale_es,
+		// Locale_fa,
 		Locale_fi,
 		Locale_fr,
-		Locale_he,
+		// Locale_he,
 		Locale_it,
 		Locale_ja,
 		Locale_ko,
@@ -117,14 +119,16 @@ func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 	// TODO: Temporary disabled because of RTL i18n, need help from Hebrew translator
 	// case Locale_he:
 	// 	rawData = i18n.Locale_he
-	// 	case Locale_it:
-	// 		rawData = i18n.Locale_it
-	// 	case Locale_ja:
-	// 		rawData = i18n.Locale_ja
-	// 	case Locale_ko:
-	// 		rawData = i18n.Locale_ko
-	// 	case Locale_nb:
-	// 		rawData = i18n.Locale_nb
+	case Locale_it:
+		rawData = i18n.Locale_it
+	case Locale_ja:
+		rawData = i18n.Locale_ja
+	case Locale_ko:
+		rawData = i18n.Locale_ko
+	case Locale_nb:
+		rawData = i18n.Locale_nb
+	case Locale_nl:
+		rawData = i18n.Locale_nl
 	// 	case Locale_pt_BR:
 	// 		rawData = i18n.Locale_pt_BR
 	// 	case Locale_ro:

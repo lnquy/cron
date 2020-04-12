@@ -17,6 +17,11 @@ var (
 		Locale_fi: fi_TestCases(),
 		Locale_fr: fr_TestCases(),
 		// Locale_he: he_TestCases(),  // TODO: Need help from Hebrew translator
+		Locale_it: it_TestCases(),
+		Locale_ja: ja_TestCases(),
+		Locale_ko: ko_TestCases(),
+		Locale_nb: nb_TestCases(),
+		Locale_nl: nl_TestCases(),
 	}
 )
 
