@@ -243,7 +243,7 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 		// For example:
 		//   - month part '3/2' will be converted to '3-12/2' (every 2 months between March and December)
 		//   - DOW part '3/2' will be converted to '3-6/2' (every 2 days between Tuesday and Saturday)
-		if strings.Index(exprParts[i], "/") != -1 && !rangeRegex.MatchString(exprParts[i]) {
+		if idx := strings.Index(exprParts[i], "/"); idx != -1 && !rangeRegex.MatchString(exprParts[i]) {
 			var stepRangeThrough string
 			switch i {
 			case 4: // Month
@@ -257,8 +257,7 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 			if stepRangeThrough == "" {
 				continue
 			}
-			idx := strings.Index(exprParts[i], "/")
-			exprParts[i] = fmt.Sprintf("%s-%s/%s", exprParts[i][:idx], stepRangeThrough, exprParts[i][idx:])
+			exprParts[i] = fmt.Sprintf("%s-%s/%s", exprParts[i][:idx], stepRangeThrough, exprParts[i][idx+1:])
 		}
 	}
 

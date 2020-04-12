@@ -254,7 +254,7 @@ func TestCronParser_Parse(t *testing.T) {
 				t.Errorf("%d. %s: expected return nil when error, got %v", i, tc.name, parsed)
 				return
 			}
-			return
+			continue
 		}
 
 		if !reflect.DeepEqual(parsed, tc.outExprs) {
