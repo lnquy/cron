@@ -96,12 +96,12 @@ func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 	var rawData string
 	localeMap := make(map[string]interface{}, 60)
 	switch typ {
-	// case Locale_cs:
-	// 	rawData = i18n.Locale_cs
-	// case Locale_da:
-	// 	rawData = i18n.Locale_da
-	// case Locale_de:
-	// 	rawData = i18n.Locale_de
+	case Locale_cs:
+		rawData = i18n.Locale_cs
+	case Locale_da:
+		rawData = i18n.Locale_da
+	case Locale_de:
+		rawData = i18n.Locale_de
 	case Locale_en:
 		rawData = i18n.Locale_en
 	// 	case Locale_es:
@@ -257,14 +257,14 @@ var (
 	commaEveryX0Years                   LocaleKey = "commaEveryX0Years"
 	commaStartingX0                     LocaleKey = "commaStartingX0"
 	daysOfTheWeek                       LocaleKey = "daysOfTheWeek"
-	monthsOfTheYear                     LocaleKey = "monthsOfTheYear"
-	pm                                  LocaleKey = "pm"
-	am                                  LocaleKey = "am"
 	atX0SecondsPastTheMinuteGt20        LocaleKey = "atX0SecondsPastTheMinuteGt20"
 	atX0MinutesPastTheHourGt20          LocaleKey = "atX0MinutesPastTheHourGt20"
-	dayX0                               LocaleKey = "dayX0"
 	commaMonthX0ThroughMonthX1          LocaleKey = "commaMonthX0ThroughMonthX1"
 	commaOnlyInMonthX0                  LocaleKey = "commaOnlyInMonthX0"
 	commaYearX0ThroughYearX1            LocaleKey = "commaYearX0ThroughYearX1"
+	dayX0                               LocaleKey = "dayX0"
+	monthsOfTheYear                     LocaleKey = "monthsOfTheYear"
+	pm                                  LocaleKey = "pm"
+	am                                  LocaleKey = "am"
 	commaOnlyInYearX0                   LocaleKey = "commaOnlyInYearX0"
 )
