@@ -1,5 +1,6 @@
 package i18n
 
+// Danish
 const Locale_da = `
 {
 	"confSetPeriodBeforeTime": false,

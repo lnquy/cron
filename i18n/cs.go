@@ -1,5 +1,6 @@
 package i18n
 
+// Czech
 const Locale_cs = `
 {
     "confSetPeriodBeforeTime": false,

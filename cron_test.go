@@ -12,6 +12,11 @@ var (
 		Locale_da: da_TestCases(),
 		Locale_de: de_TestCases(),
 		Locale_en: en_TestCases(),
+		Locale_es: es_TestCases(),
+		// Locale_fa: fa_TestCases(), // TODO: Need help from Farsi translator
+		Locale_fi: fi_TestCases(),
+		Locale_fr: fr_TestCases(),
+		// Locale_he: he_TestCases(),  // TODO: Need help from Hebrew translator
 	}
 )
 

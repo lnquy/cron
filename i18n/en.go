@@ -1,5 +1,6 @@
 package i18n
 
+// English
 const Locale_en = `
 {
 	"confSetPeriodBeforeTime": false,
