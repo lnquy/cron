@@ -2,6 +2,7 @@ package cron
 
 func en_TestCases() []localeTestCase {
 	return []localeTestCase{
+		// Every
 		{inExpr: "* * * * * *", outErr: nil, outDesc: "Every second"},
 		{inExpr: "* * * * *", outErr: nil, outDesc: "Every minute"},
 		{inExpr: "* * * * *", isVerbose: true, outErr: nil, outDesc: "Every minute, every hour, every day"},
@@ -15,5 +16,108 @@ func en_TestCases() []localeTestCase {
 		{inExpr: "* * * * * * 2013", outErr: nil, outDesc: "Every second, only in 2013"},
 		{inExpr: "* * * * * 2013", outErr: nil, outDesc: "Every minute, only in 2013"},
 		{inExpr: "* * * * * 2013,2014", outErr: nil, outDesc: "Every minute, only in 2013 and 2014"},
+
+		// Interval
+		{inExpr: "*/45 * * * * *", outErr: nil, outDesc: "Every 45 seconds"},
+		{inExpr: "*/5 * * * *", outErr: nil, outDesc: "Every 5 minutes"},
+		{inExpr: "*/10 * * * *", outErr: nil, outDesc: "Every 10 minutes"},
+		{inExpr: "0 */5 * * * *", outErr: nil, outDesc: "Every 5 minutes"},
+		{inExpr: "0 9-17 * * *", outErr: nil, outDesc: "Every hour, between 09:00 AM and 05:59 PM"},
+		{inExpr: "0 * ? * 2/1 *", outErr: nil, outDesc: "Every minute, February through December"},
+		{inExpr: "0 * ? * 2/1", outErr: nil, outDesc: "Every hour, Tuesday through Saturday"},
+		{inExpr: "0 52 13 ? * 3/1", outErr: nil, outDesc: "At 01:52 PM, Wednesday through Saturday"},
+
+		// Range
+		{inExpr: "0 23 ? * MON-FRI", outErr: nil, outDesc: "At 11:00 PM, Monday through Friday"},
+		{inExpr: "30 11 * * 1-5", outErr: nil, outDesc: "At 11:30 AM, Monday through Friday"},
+		{inExpr: "0-10 11 * * *", outErr: nil, outDesc: "Every minute between 11:00 AM and 11:10 AM"},
+		{inExpr: "23 12 * Jan-Mar *", outErr: nil, outDesc: "At 12:23 PM, January through March"},
+		{inExpr: "23 12 * JAN-FEB *", outErr: nil, outDesc: "At 12:23 PM, January through February"},
+		{inExpr: "1 1,3-4 * * *", outErr: nil, outDesc: "At 1 minutes past the hour, at 01:00 AM and 03:00 AM through 04:59 AM"},
+		{inExpr: "* 0 */4 * * *", outErr: nil, outDesc: "Every second, at 0 minutes past the hour, every 4 hours"},
+		{inExpr: "*/10 0 * * * *", outErr: nil, outDesc: "Every 10 seconds, at 0 minutes past the hour"},
+		{inExpr: "* 0 0 * * *", outErr: nil, outDesc: "Every second, at 0 minutes past the hour, between 12:00 AM and 12:59 AM"},
+		{inExpr: "* 0 * * *", outErr: nil, outDesc: "Every minute, between 12:00 AM and 12:59 AM"},
+		{inExpr: "* 0 * * * *", outErr: nil, outDesc: "Every second, at 0 minutes past the hour"},
+
+		// At
+		{inExpr: "30 11 * * *", outErr: nil, outDesc: "At 11:30 AM"},
+		{inExpr: "23 12 * * SUN", outErr: nil, outDesc: "At 12:23 PM, only on Sunday"},
+		{inExpr: "30 02 14 * * *", outErr: nil, outDesc: "At 02:02:30 PM"},
+		{inExpr: "0 0 6 1/1 * ?", outErr: nil, outDesc: "At 06:00 AM"},
+		{inExpr: "0 5 0/1 * * ?", outErr: nil, outDesc: "At 5 minutes past the hour"},
+		{inExpr: "46 9 * * 1", outErr: nil, outDesc: "At 09:46 AM, only on Monday"},
+		{inExpr: "46 9 * * 7", outErr: nil, outDesc: "At 09:46 AM, only on Sunday", name: "7 should mean Sunday"},
+		{inExpr: "23 12 15 * *", outErr: nil, outDesc: "At 12:23 PM, on day 15 of the month"},
+		{inExpr: "23 12 * JAN *", outErr: nil, outDesc: "At 12:23 PM, only in January"},
+		{inExpr: "23 12 ? JAN *", outErr: nil, outDesc: "At 12:23 PM, only in January"},
+		{inExpr: "0 7 * * *", outErr: nil, outDesc: "At 07:00 AM", name: "trailing space"},
+		{inExpr: "30 14,16 * * *", outErr: nil, outDesc: "At 02:30 PM and 04:30 PM"},
+		{inExpr: "30 6,14,16 * * *", outErr: nil, outDesc: "At 06:30 AM, 02:30 PM and 04:30 PM"},
+		{inExpr: "0 * 31 * 1", outErr: nil, outDesc: "Every hour, on day 31 of the month, and on Monday"},
+
+		// Weekday
+		{inExpr: "* * LW * *", outErr: nil, outDesc: "Every minute, on the last weekday of the month"},
+		{inExpr: "* * WL * *", outErr: nil, outDesc: "Every minute, on the last weekday of the month"},
+		{inExpr: "* * 1W * *", outErr: nil, outDesc: "Every minute, on the first weekday of the month"},
+		{inExpr: "* * 13W * *", outErr: nil, outDesc: "Every minute, on the weekday nearest day 13 of the month"},
+		{inExpr: "* * W1 * *", outErr: nil, outDesc: "Every minute, on the first weekday of the month"},
+		{inExpr: "* * 5W * *", outErr: nil, outDesc: "Every minute, on the weekday nearest day 5 of the month"},
+		{inExpr: "* * W5 * *", outErr: nil, outDesc: "Every minute, on the weekday nearest day 5 of the month"},
+
+		// Last
+		{inExpr: "* * * * 4L", outErr: nil, outDesc: "Every minute, on the last Thursday of the month"},
+		{inExpr: "*/5 * L JAN *", outErr: nil, outDesc: "Every 5 minutes, on the last day of the month, only in January"},
+		{inExpr: "0 20 15,L * *", outErr: nil, outDesc: "At 08:00 PM, on day 15 and the last day of the month"},
+		{inExpr: "0 20 1-10,20-L * *", outErr: nil, outDesc: "At 08:00 PM, on day 1 through 10 and 20 through the last day of the month"},
+		{inExpr: "0 15 10 * * L", outErr: nil, outDesc: "At 10:15 AM, only on Saturday"},
+		{inExpr: "0 15 10 L * *", outErr: nil, outDesc: "At 10:15 AM, on the last day of the month"},
+		{inExpr: "0 0 0 L-5 * ?", outErr: nil, outDesc: "At 12:00 AM, 5 days before the last day of the month"},
+
+		// Non-trivial
+		{inExpr: "*/5 15 * * MON-FRI", outErr: nil, outDesc: "Every 5 minutes, between 03:00 PM and 03:59 PM, Monday through Friday"},
+		{inExpr: "* * * * MON#3", outErr: nil, outDesc: "Every minute, on the third Monday of the month"},
+		{inExpr: "5-10 * * * * *", outErr: nil, outDesc: "Seconds 5 through 10 past the minute"},
+		{inExpr: "5-10 30-35 10-12 * * *", outErr: nil, outDesc: "Seconds 5 through 10 past the minute, minutes 30 through 35 past the hour, between 10:00 AM and 12:59 PM"},
+		{inExpr: "30 */5 * * * *", outErr: nil, outDesc: "At 30 seconds past the minute, every 5 minutes"},
+		{inExpr: "10 0/5 * * * ?", outErr: nil, outDesc: "At 10 seconds past the minute, every 5 minutes"},
+		{inExpr: "2-59/3 1,9,22 11-26 1-6 ?", outErr: nil, outDesc: "Every 3 minutes, minutes 2 through 59 past the hour, at 01:00 AM, 09:00 AM, and 10:00 PM, between day 11 and 26 of the month, January through June"},
+		{inExpr: "23 12 * JAN-FEB * 2013-2014", outErr: nil, outDesc: "At 12:23 PM, January through February, 2013 through 2014"},
+		{inExpr: "23 12 * JAN-MAR * 2013-2015", outErr: nil, outDesc: "At 12:23 PM, January through March, 2013 through 2015"},
+		{inExpr: "12-50 0-10 6 * * * 2022", outErr: nil, outDesc: "Seconds 12 through 50 past the minute, minutes 0 through 10 past the hour, at 06:00 AM, only in 2022"},
+		{inExpr: "0 0/30 8-9 5,20 * ?", outErr: nil, outDesc: "Every 30 minutes, between 08:00 AM and 09:59 AM, on day 5 and 20 of the month"},
+		{inExpr: "23 12 * * SUN#2", outErr: nil, outDesc: "At 12:23 PM, on the second Sunday of the month"},
+		{inExpr: "0 25 7-19/8 ? * *", outErr: nil, outDesc: "At 25 minutes past the hour, every 8 hours, between 07:00 AM and 07:59 PM"},
+		{inExpr: "0 25 7-20/13 ? * *", outErr: nil, outDesc: "At 25 minutes past the hour, every 13 hours, between 07:00 AM and 08:59 PM"},
+		{inExpr: "0 0 8 1/3 * ? *", outErr: nil, outDesc: "At 08:00 AM, every 3 days"},
+		{inExpr: "0 15 10 ? * */3", outErr: nil, outDesc: "At 10:15 AM, every 3 days of the week"},
+		{inExpr: "* * * ? * 1-5/2", outErr: nil, outDesc: "Every second, every 2 days of the week, Monday through Friday"},
+		{inExpr: "0 5 7 2 1/3 ? *", outErr: nil, outDesc: "At 07:05 AM, on day 2 of the month, every 3 months"},
+		{inExpr: "0 15 6 1 1 ? 1/2", outErr: nil, outDesc: "At 06:15 AM, on day 1 of the month, only in January, every 2 years"},
+		{inExpr: "2,4-5 1 * * *", outErr: nil, outDesc: "At 2 and 4 through 5 minutes past the hour, at 01:00 AM"},
+		{inExpr: "2,26-28 18 * * *", outErr: nil, outDesc: "At 2 and 26 through 28 minutes past the hour, at 06:00 PM"},
+		{inExpr: "5/30 * * * * ?", outErr: nil, outDesc: "Every 30 seconds, starting at 5 seconds past the minute"},
+		{inExpr: "0 5/30 * * * ?", outErr: nil, outDesc: "Every 30 minutes, starting at 5 minutes past the hour"},
+		{inExpr: "* * 5/8 * * ?", outErr: nil, outDesc: "Every second, every 8 hours, starting at 05:00 AM"},
+		{inExpr: "0 5 7 2/3 * ? *", outErr: nil, outDesc: "At 07:05 AM, every 3 days, starting on day 2 of the month"},
+		{inExpr: "0 5 7 ? 3/2 ? *", outErr: nil, outDesc: "At 07:05 AM, every 2 months, March through December"},
+		{inExpr: "0 5 7 ? * 2/3 *", outErr: nil, outDesc: "At 07:05 AM, every 3 days of the week, Tuesday through Saturday"},
+		{inExpr: "0 5 7 ? * ? 2016/4", outErr: nil, outDesc: "At 07:05 AM, every 4 years, 2016 through 2099"},
+		{inExpr: "0 30 10-13 ? * wed,FRI", outErr: nil, outDesc: "At 30 minutes past the hour, between 10:00 AM and 01:59 PM, only on Wednesday and Friday"},
+		{inExpr: "0 00 10 ? * MON-THU,SUN *", outErr: nil, outDesc: "At 10:00 AM, only on Monday through Thursday and Sunday"},
+		{inExpr: "0 0 0 1,2,3 * WED,FRI", outErr: nil, outDesc: "At 12:00 AM, on day 1, 2, and 3 of the month, and on Wednesday and Friday"},
+		{inExpr: "0 2,16 1,8,15,22 * 1,2", outErr: nil, outDesc: "At 02:00 AM and 04:00 PM, on day 1, 8, 15, and 22 of the month, and on Monday and Tuesday"},
+		{inExpr: "0 */4,6 * * * ", outErr: nil, outDesc: "At 0 minutes past the hour, every 4,6 hours"},
+		{inExpr: "5 30 6,14,16 5 * *", outErr: nil, outDesc: "At 5 seconds past the minute, at 30 minutes past the hour, at 06:00 AM, 02:00 PM, and 04:00 PM, on day 5 of the month"},
+		{inExpr: "0-20/3 9 * * *", outErr: nil, outDesc: "Every 3 minutes, minutes 0 through 20 past the hour, between 09:00 AM and 09:59 AM"},
+
+		// Verbose
+		{inExpr: "30 4 1 * *", isVerbose: true, outErr: nil, outDesc: "At 04:30 AM, on day 1 of the month"},
+		{inExpr: "0 13 * * 1", isVerbose: true, outErr: nil, outDesc: "At 01:00 PM, only on Monday"},
+
+		// Error
+		{inExpr: "sdlksldksldksd", outErr: InvalidExprError, outDesc: ""},
+		{inExpr: "", outErr: InvalidExprError, outDesc: ""},
+		{inExpr: "0 30 14 1W,15W * ? *", outErr: InvalidExprDayOfMonthError, outDesc: ""},
 	}
 }

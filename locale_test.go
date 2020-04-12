@@ -8,5 +8,5 @@ type localeTestCase struct {
 
 	isDOWStartsAtOne   bool
 	isVerbose          bool
-	is12HourTimeFormat bool
+	is24HourTimeFormat bool
 }

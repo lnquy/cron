@@ -247,18 +247,18 @@ func TestCronParser_Parse(t *testing.T) {
 				return
 			}
 			if !errors.Is(err, tc.outErr) {
-				t.Errorf("%d. %s: expected %v error, got %v", i, tc.name, tc.outErr, err)
+				t.Errorf("%d. %s: expected '%v' error, got '%v'", i, tc.name, tc.outErr, err)
 				return
 			}
 			if !reflect.DeepEqual(parsed, tc.outExprs) {
-				t.Errorf("%d. %s: expected return nil when error, got %v", i, tc.name, parsed)
+				t.Errorf("%d. %s: expected return nil when error, got '%v'", i, tc.name, parsed)
 				return
 			}
 			continue
 		}
 
 		if !reflect.DeepEqual(parsed, tc.outExprs) {
-			t.Errorf("%d. %s: expected %v, got %v", i, tc.name, tc.outExprs, parsed)
+			t.Errorf("%d. %s: expected '%v', got '%v'", i, tc.name, tc.outExprs, parsed)
 			return
 		}
 	}

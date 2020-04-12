@@ -11,7 +11,7 @@ var (
 	specialChars = []rune{'/', '-', ',', '*'}
 
 	weekdaysNumberRegex = regexp.MustCompile(`(\d{1,2}w)|(w\d{1,2})`)
-	lastDayOffsetRegex  = regexp.MustCompile(`L-(\d{1,2})`)
+	lastDayOffsetRegex  = regexp.MustCompile(`l-(\d{1,2})`)
 )
 
 func containsAny(s string, matches []rune) bool {
@@ -31,7 +31,7 @@ type (
 	ExpressionDescriptor struct {
 		isVerbose          bool
 		isDOWStartsAtOne   bool
-		is12HourTimeFormat bool
+		is24HourTimeFormat bool
 
 		logger  Logger
 		parser  Parser
@@ -91,6 +91,7 @@ func (e *ExpressionDescriptor) ToDescription(expr string, loc LocaleType) (desc 
 
 	desc = timeSegment + dayOfMonthDesc + dayOfWeekDesc + monthDesc + yearDesc
 	desc = transformVerbosity(desc, locale, e.isVerbose)
+	desc = strings.Join(strings.Fields(desc), " ")
 	desc = strings.ToUpper(desc[:1]) + desc[1:]
 
 	return desc, nil
@@ -118,7 +119,7 @@ func (e *ExpressionDescriptor) getTimeOfDayDescription(exprParts []string, local
 
 	if !containsAny(second, specialChars) && !containsAny(minute, specialChars) && !containsAny(hour, specialChars) {
 		// specific time of day (i.e. 10:14:00)
-		desc += locale.GetString(atSpace) + formatTime(hour, minute, second, locale, e.is12HourTimeFormat)
+		desc += locale.GetString(atSpace) + formatTime(hour, minute, second, locale, e.is24HourTimeFormat)
 	} else if second == "" &&
 		strings.Index(minute, "-") > -1 &&
 		!(strings.Index(minute, ",") > -1) &&
@@ -126,9 +127,11 @@ func (e *ExpressionDescriptor) getTimeOfDayDescription(exprParts []string, local
 		!containsAny(hour, specialChars) {
 		// minute range in single hour (i.e. 0-10 11)
 		idx := strings.Index(minute, "-")
-		desc += sprintf(locale.GetString(everyMinuteBetweenX0AndX1), minute[:idx], minute[idx:])
+		desc += sprintf(locale.GetString(everyMinuteBetweenX0AndX1),
+			formatTime(hour, minute[:idx], "", locale, e.is24HourTimeFormat),
+			formatTime(hour, minute[idx+1:], "", locale, e.is24HourTimeFormat))
 	} else if second == "" &&
-		strings.Index(hour, ",") > 1 &&
+		strings.Index(hour, ",") > -1 &&
 		strings.Index(hour, "-") == -1 &&
 		strings.Index(hour, "/") == -1 &&
 		!containsAny(minute, specialChars) {
@@ -137,7 +140,7 @@ func (e *ExpressionDescriptor) getTimeOfDayDescription(exprParts []string, local
 		desc += locale.GetString(at)
 		for i, p := range hourParts {
 			desc += " "
-			desc += formatTime(p, minute, "", locale, e.is12HourTimeFormat)
+			desc += formatTime(p, minute, "", locale, e.is24HourTimeFormat)
 			if i < len(hourParts)-2 {
 				desc += ", "
 			}
@@ -224,9 +227,9 @@ func (e *ExpressionDescriptor) getDayOfMonthDescription(exprParts []string, loca
 		}
 
 		// Handle "last day offset" (i.e. L-5:  "5 days before the last day of the month")
-		lastDayOffsetMatches := lastDayOffsetRegex.FindAllString(dom, -1)
+		lastDayOffsetMatches := lastDayOffsetRegex.FindAllStringSubmatch(dom, -1)
 		if len(lastDayOffsetMatches) > 0 {
-			desc = sprintf(locale.GetString(commaDaysBeforeTheLastDayOfTheMonth), lastDayOffsetMatches[0]) // TODO: cronstrue used 1
+			desc = sprintf(locale.GetString(commaDaysBeforeTheLastDayOfTheMonth), lastDayOffsetMatches[0][1])
 			break
 		}
 		// * dayOfMonth and dayOfWeek specified so use dayOfWeek verbiage instead
@@ -240,7 +243,10 @@ func (e *ExpressionDescriptor) getDayOfMonthDescription(exprParts []string, loca
 				if s == "l" {
 					return locale.GetString(lastDay)
 				}
-				return sprintf(locale.GetString(dayX0), s) // TODO
+				if msg := locale.GetString(dayX0); msg != "" {
+					return sprintf(msg, s)
+				}
+				return s
 			},
 			func(s string) string {
 				if s == "1" {
@@ -313,7 +319,7 @@ func (e *ExpressionDescriptor) getDayOfWeekDescription(exprParts []string, local
 		func(s string) string {
 			exp := s
 			if idx := strings.Index(s, "#"); idx > -1 {
-				exp = s[:idx+1] // TODO
+				exp = s[:idx]
 			} else if strings.Index(s, "l") > -1 {
 				exp = strings.Replace(exp, "l", "", -1)
 			}
@@ -402,13 +408,12 @@ func (e *ExpressionDescriptor) getLocale(loc LocaleType) Locale {
 	return v
 }
 
-func formatTime(hour, minute, second string, locale Locale, isUse12HourTimeFormat bool) string {
+func formatTime(hour, minute, second string, locale Locale, isUse24HourTimeFormat bool) string {
 	hourInt, _ := strconv.Atoi(hour)
 	minuteInt, _ := strconv.Atoi(minute)
-	secondInt, _ := strconv.Atoi(second)
 	period := ""
 
-	if isUse12HourTimeFormat {
+	if !isUse24HourTimeFormat {
 		period = getPeriod(hourInt, locale)
 		if hourInt > 12 {
 			hourInt -= 12
@@ -420,8 +425,12 @@ func formatTime(hour, minute, second string, locale Locale, isUse12HourTimeForma
 
 	hour = fmt.Sprintf("%02d", hourInt)
 	minute = fmt.Sprintf("%02d", minuteInt)
-	second = fmt.Sprintf("%02d", secondInt)
-	return fmt.Sprintf("%s:%s:%s %s", hour, minute, second, period)
+	if second != "" {
+		secondInt, _ := strconv.Atoi(second)
+		second = fmt.Sprintf("%02d", secondInt)
+		return fmt.Sprintf("%s:%s:%s %s", hour, minute, second, period)
+	}
+	return fmt.Sprintf("%s:%s %s", hour, minute, period)
 }
 
 func getPeriod(hour int, locale Locale) string {
@@ -561,7 +570,7 @@ func (e *ExpressionDescriptor) getHoursDescription(exprParts []string, locale Lo
 		exprParts[2],
 		locale.GetString(everyHour),
 		func(s string) string {
-			return formatTime(s, "0", "", locale, e.is12HourTimeFormat)
+			return formatTime(s, "0", "", locale, e.is24HourTimeFormat)
 		},
 		func(s string) string {
 			return sprintf(locale.GetString(everyX0Hours), s)

@@ -18,9 +18,9 @@ func DayOfWeekStartsAtOne(v bool) Option {
 	}
 }
 
-func Use12HourTimeFormat(v bool) Option {
+func Use24HourTimeFormat(v bool) Option {
 	return func(exprDesc *ExpressionDescriptor) {
-		exprDesc.is12HourTimeFormat = v
+		exprDesc.is24HourTimeFormat = v
 	}
 }
 
