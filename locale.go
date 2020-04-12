@@ -63,9 +63,9 @@ var (
 		Locale_sv,
 		Locale_sw,
 		Locale_tr,
-		Locale_uk,
-		Locale_zh_CN,
-		Locale_zh_TW,
+		// Locale_uk,
+		// Locale_zh_CN,
+		// Locale_zh_TW,
 	}
 )
 
@@ -136,23 +136,23 @@ func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 		rawData = i18n.Locale_pt_BR
 	// case Locale_ro: // TODO: Need help from Romanian translator
 	// 	rawData = i18n.Locale_ro
-	// case Locale_ru:  // TODO: Need help from Russian translator
+	// case Locale_ru: // TODO: Need help from Russian translator
 	// 	rawData = i18n.Locale_ru
 	case Locale_sk:
 		rawData = i18n.Locale_sk
 	case Locale_sl:
 		rawData = i18n.Locale_sl
-	// 	case Locale_sv:
-	// 		rawData = i18n.Locale_sv
-	// 	case Locale_sw:
-	// 		rawData = i18n.Locale_sw
-	// 	case Locale_tr:
-	// 		rawData = i18n.Locale_tr
-	// 	case Locale_uk:
-	// 		rawData = i18n.Locale_uk
-	// 	case Locale_zh_CN:
-	// 		rawData = i18n.Locale_zh_CN
-	// case Locale_zh_TW:
+	case Locale_sv:
+		rawData = i18n.Locale_sv
+	case Locale_sw:
+		rawData = i18n.Locale_sw
+	case Locale_tr:
+		rawData = i18n.Locale_tr
+	// case Locale_uk: // TODO: Need help from Ukrainian translator
+	// 	rawData = i18n.Locale_uk
+	// case Locale_zh_CN: // TODO: Need help from Chinese translator
+	// 	rawData = i18n.Locale_zh_CN
+	// case Locale_zh_TW: // TODO: Need help from Chinese translator
 	// 	rawData = i18n.Locale_zh_TW
 	case LocaleAll:
 		loaders = make([]Locale, 0, len(allLocales))
