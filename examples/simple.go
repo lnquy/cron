@@ -12,7 +12,8 @@ const expr = "0 * 9 LW JAN-OCT 1-5 2000/10"
 
 func main() {
 	exprDesc, err := cron.NewDescriptor(
-		// cron.Use24HourTimeFormat(true),
+		cron.Use24HourTimeFormat(true),
+		cron.DayOfWeekStartsAtOne(true),
 		cron.Verbose(true),
 		cron.SetLogger(log.New(os.Stdout, "cron: ", 0)),
 		cron.SetLocales(cron.Locale_en),
