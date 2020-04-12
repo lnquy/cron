@@ -17,11 +17,17 @@ var (
 		Locale_fi: fi_TestCases(),
 		Locale_fr: fr_TestCases(),
 		// Locale_he: he_TestCases(),  // TODO: Need help from Hebrew translator
-		Locale_it: it_TestCases(),
-		Locale_ja: ja_TestCases(),
-		Locale_ko: ko_TestCases(),
-		Locale_nb: nb_TestCases(),
-		Locale_nl: nl_TestCases(),
+		Locale_it:    it_TestCases(),
+		Locale_ja:    ja_TestCases(),
+		Locale_ko:    ko_TestCases(),
+		Locale_nb:    nb_TestCases(),
+		Locale_nl:    nl_TestCases(),
+		Locale_pl:    pl_TestCases(),
+		Locale_pt_BR: pt_BR_TestCases(),
+		// Locale_ru: ru_TestCases(), // TODO: Need help from Russian translator
+		// Locale_ro: ro_TestCases(),   // TODO: Need help from Romanian translator
+		Locale_sk: sk_TestCases(),
+		Locale_sl: sl_TestCases(),
 	}
 )
 

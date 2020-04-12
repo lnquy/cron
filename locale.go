@@ -24,6 +24,7 @@ const (
 	Locale_ko    LocaleType = "ko"
 	Locale_nb    LocaleType = "nb"
 	Locale_nl    LocaleType = "nl"
+	Locale_pl    LocaleType = "pl"
 	Locale_pt_BR LocaleType = "pt_BR"
 	Locale_ro    LocaleType = "ro"
 	Locale_ru    LocaleType = "ru"
@@ -52,9 +53,11 @@ var (
 		Locale_ja,
 		Locale_ko,
 		Locale_nb,
+		Locale_nl,
+		Locale_pl,
 		Locale_pt_BR,
-		Locale_ro,
-		Locale_ru,
+		// Locale_ro,
+		// Locale_ru,
 		Locale_sk,
 		Locale_sl,
 		Locale_sv,
@@ -109,15 +112,13 @@ func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 		rawData = i18n.Locale_en
 	case Locale_es:
 		rawData = i18n.Locale_es
-	// TODO: Temporary disabled because of RTL i18n, need help from Farsi translator
-	// case Locale_fa:
+	// case Locale_fa: // TODO: Need help from Farsi translator
 	// 	rawData = i18n.Locale_fa
 	case Locale_fi:
 		rawData = i18n.Locale_fi
 	case Locale_fr:
 		rawData = i18n.Locale_fr
-	// TODO: Temporary disabled because of RTL i18n, need help from Hebrew translator
-	// case Locale_he:
+	// case Locale_he: // TODO: Need help from Hebrew translator
 	// 	rawData = i18n.Locale_he
 	case Locale_it:
 		rawData = i18n.Locale_it
@@ -129,16 +130,18 @@ func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 		rawData = i18n.Locale_nb
 	case Locale_nl:
 		rawData = i18n.Locale_nl
-	// 	case Locale_pt_BR:
-	// 		rawData = i18n.Locale_pt_BR
-	// 	case Locale_ro:
-	// 		rawData = i18n.Locale_ro
-	// 	case Locale_ru:
-	// 		rawData = i18n.Locale_ru
-	// 	case Locale_sk:
-	// 		rawData = i18n.Locale_sk
-	// 	case Locale_sl:
-	// 		rawData = i18n.Locale_sl
+	case Locale_pl:
+		rawData = i18n.Locale_pl
+	case Locale_pt_BR:
+		rawData = i18n.Locale_pt_BR
+	// case Locale_ro: // TODO: Need help from Romanian translator
+	// 	rawData = i18n.Locale_ro
+	// case Locale_ru:  // TODO: Need help from Russian translator
+	// 	rawData = i18n.Locale_ru
+	case Locale_sk:
+		rawData = i18n.Locale_sk
+	case Locale_sl:
+		rawData = i18n.Locale_sl
 	// 	case Locale_sv:
 	// 		rawData = i18n.Locale_sv
 	// 	case Locale_sw:
