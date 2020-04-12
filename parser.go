@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	InvalidExprError = errors.New("invalid expression")
+	InvalidExprError           = errors.New("invalid expression")
 	InvalidExprSecondError     = errors.New("invalid expression, second part")
 	InvalidExprMinuteError     = errors.New("invalid expression, minute part")
 	InvalidExprHourError       = errors.New("invalid expression, hour part")

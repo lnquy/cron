@@ -8,6 +8,7 @@ import (
 )
 
 const expr = "0 * 9 LW JAN-OCT 1-5 2000/10"
+
 // const expr = "00 11,16 * * *"
 
 func main() {
