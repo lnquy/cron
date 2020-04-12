@@ -12,11 +12,8 @@ const expr = "0 0 * LW JAN-OCT 1-5 2000-2099"
 
 func main() {
 	exprDesc, err := cron.NewDescriptor(
-		cron.DayOfWeekStartsAtZero(),
-		cron.Use24HourTimeFormat(),
-		cron.Verbose(),
-		cron.SetLogger(log.New(os.Stdout, "cron: ", log.LstdFlags)),
-		cron.SetLocales(cron.Locale_da, cron.Locale_de, cron.Locale_en, cron.Locale_es),
+		cron.SetLogger(log.New(os.Stdout, "cron: ", 0)),
+		cron.SetLocales(cron.LocaleAll),
 	)
 	if err != nil {
 		log.Panicf("failed to create CRON expression descriptor: %s", err)

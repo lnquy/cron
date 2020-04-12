@@ -6,21 +6,21 @@ func SetLogger(logger Logger) Option {
 	}
 }
 
-func Verbose() Option {
+func Verbose(v bool) Option {
 	return func(exprDesc *ExpressionDescriptor) {
-		exprDesc.isVerbose = true
+		exprDesc.isVerbose = v
 	}
 }
 
-func DayOfWeekStartsAtZero() Option {
+func DayOfWeekStartsAtOne(v bool) Option {
 	return func(exprDesc *ExpressionDescriptor) {
-		exprDesc.isDOWStartsAtZero = true
+		exprDesc.isDOWStartsAtOne = v
 	}
 }
 
-func Use24HourTimeFormat() Option {
+func Use12HourTimeFormat(v bool) Option {
 	return func(exprDesc *ExpressionDescriptor) {
-		exprDesc.isDOWStartsAtZero = true
+		exprDesc.is12HourTimeFormat = v
 	}
 }
 

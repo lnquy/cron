@@ -20,7 +20,7 @@ var (
 )
 
 var (
-	yearRegex = regexp.MustCompile(`^\d{4}$`)
+	yearRegex = regexp.MustCompile(`\d{4}$`)
 
 	everySecMinRegex = regexp.MustCompile(`[*/]`)
 	everyHourRegex   = regexp.MustCompile(`[*\-,/]`)
@@ -66,7 +66,7 @@ var (
 
 type (
 	cronParser struct {
-		isDOWStartsAtZero bool
+		isDOWStartsAtOne bool
 	}
 
 	Parser interface {
@@ -170,7 +170,7 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 			continue
 		}
 
-		if p.isDOWStartsAtZero {
+		if !p.isDOWStartsAtOne {
 			if c != sevenRune {
 				continue
 			}

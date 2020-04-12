@@ -235,42 +235,32 @@ func TestCronParser_Parse(t *testing.T) {
 		// },
 	}
 
-	parser := cronParser{isDOWStartsAtZero: true}
+	parser := cronParser{}
 
 	for i, tc := range tcs {
-		testFunc := func() {
-			parsed, err := parser.Parse(tc.inExpr)
-			if tc.outErr != nil {
-				if err == nil {
-					t.Errorf("%d. %s: expected error, got nil", i, tc.name)
-					return
-				}
-				if !errors.Is(err, tc.outErr) {
-					t.Errorf("%d. %s: expected %v error, got %v", i, tc.name, tc.outErr, err)
-					return
-				}
-				if !reflect.DeepEqual(parsed, tc.outExprs) {
-					t.Errorf("%d. %s: expected return nil when error, got %v", i, tc.name, parsed)
-					return
-				}
+		parser.isDOWStartsAtOne = tc.inTestDOWStartsAtOne
+
+		parsed, err := parser.Parse(tc.inExpr)
+		if tc.outErr != nil {
+			if err == nil {
+				t.Errorf("%d. %s: expected error, got nil", i, tc.name)
 				return
 			}
-
+			if !errors.Is(err, tc.outErr) {
+				t.Errorf("%d. %s: expected %v error, got %v", i, tc.name, tc.outErr, err)
+				return
+			}
 			if !reflect.DeepEqual(parsed, tc.outExprs) {
-				t.Errorf("%d. %s: expected %v, got %v", i, tc.name, tc.outExprs, parsed)
+				t.Errorf("%d. %s: expected return nil when error, got %v", i, tc.name, parsed)
 				return
 			}
+			return
 		}
 
-		// Test the DOWStartsAtZero is false
-		if tc.inTestDOWStartsAtOne {
-			parser.isDOWStartsAtZero = false
-			testFunc()
-			parser.isDOWStartsAtZero = true // Set it back to default
-			continue
+		if !reflect.DeepEqual(parsed, tc.outExprs) {
+			t.Errorf("%d. %s: expected %v, got %v", i, tc.name, tc.outExprs, parsed)
+			return
 		}
-
-		testFunc() // Otherwise test with default isDOWStartsAtZero
 	}
 }
 
@@ -278,7 +268,7 @@ var _parsed []string
 
 func BenchmarkCronParser_Parse(b *testing.B) {
 	b.StopTimer()
-	parser := &cronParser{isDOWStartsAtZero: true}
+	parser := &cronParser{}
 	expr := "0/5 1,5,10,15 */2 L JAN-OCT 1-5/2 2000-2050/10"
 	var err error
 	b.StartTimer()
