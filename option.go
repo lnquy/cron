@@ -29,6 +29,7 @@ func SetLocales(locales ...LocaleType) Option {
 		loaders, err := NewLocaleLoaders(locales...)
 		if err != nil {
 			exprDesc.log("failed to init locale loaders: %s", err)
+			return
 		}
 
 		if exprDesc.locales == nil {

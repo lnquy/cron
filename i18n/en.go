@@ -2,7 +2,8 @@ package i18n
 
 const Locale_en = `
 {
-    "anErrorOccurredWhenGeneratingTheExpression": "An error occurred when generating the expression description. Check the cron expression syntax.",
+	"confSetPeriodBeforeTime": false,
+
     "everyMinute": "every minute",
     "everyHour": "every hour",
     "atSpace": "At ",

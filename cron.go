@@ -79,8 +79,6 @@ func (e *ExpressionDescriptor) ToDescription(expr string, loc LocaleType) (desc 
 		return "", fmt.Errorf("failed to parse CRON expression: %w", err)
 	}
 
-	e.log("parsed: %v", strings.Join(exprParts, " | "))
-
 	locale := e.getLocale(loc)
 
 	var timeSegment = e.getTimeOfDayDescription(exprParts, locale)
@@ -92,6 +90,7 @@ func (e *ExpressionDescriptor) ToDescription(expr string, loc LocaleType) (desc 
 	desc = timeSegment + dayOfMonthDesc + dayOfWeekDesc + monthDesc + yearDesc
 	desc = transformVerbosity(desc, locale, e.isVerbose)
 	desc = strings.Join(strings.Fields(desc), " ")
+	desc = strings.ReplaceAll(desc, " ,", ",")
 	desc = strings.ToUpper(desc[:1]) + desc[1:]
 
 	return desc, nil
@@ -412,9 +411,14 @@ func formatTime(hour, minute, second string, locale Locale, isUse24HourTimeForma
 	hourInt, _ := strconv.Atoi(hour)
 	minuteInt, _ := strconv.Atoi(minute)
 	period := ""
+	isPeriodBeforeTime := false
 
 	if !isUse24HourTimeFormat {
+		isPeriodBeforeTime = locale.GetBool(confSetPeriodBeforeTime)
 		period = getPeriod(hourInt, locale)
+		if !isPeriodBeforeTime {
+			period = " " + period
+		}
 		if hourInt > 12 {
 			hourInt -= 12
 		}
@@ -425,12 +429,20 @@ func formatTime(hour, minute, second string, locale Locale, isUse24HourTimeForma
 
 	hour = fmt.Sprintf("%02d", hourInt)
 	minute = fmt.Sprintf("%02d", minuteInt)
+	ret := ""
+	if isPeriodBeforeTime {
+		ret += period
+	}
+	ret += hour + ":" + minute
 	if second != "" {
 		secondInt, _ := strconv.Atoi(second)
 		second = fmt.Sprintf("%02d", secondInt)
-		return fmt.Sprintf("%s:%s:%s %s", hour, minute, second, period)
+		ret += ":" + second
 	}
-	return fmt.Sprintf("%s:%s %s", hour, minute, period)
+	if !isPeriodBeforeTime {
+		ret += period
+	}
+	return ret
 }
 
 func getPeriod(hour int, locale Locale) string {
