@@ -3,6 +3,7 @@ package cron
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/lnquy/cron/i18n"
 )
@@ -280,3 +281,62 @@ var (
 	am                                  LocaleKey = "am"
 	commaOnlyInYearX0                   LocaleKey = "commaOnlyInYearX0"
 )
+
+func ParseLocale(s string) (l LocaleType, err error) {
+	switch strings.ToLower(s) {
+	case "cs":
+		return Locale_cs, nil
+	case "da":
+		return Locale_da, nil
+	case "de":
+		return Locale_de, nil
+	case "en":
+		return Locale_en, nil
+	case "es":
+		return Locale_es, nil
+	case "fa":
+		return Locale_fa, nil
+	case "fi":
+		return Locale_fi, nil
+	case "fr":
+		return Locale_fr, nil
+	case "he":
+		return Locale_he, nil
+	case "it":
+		return Locale_it, nil
+	case "ja":
+		return Locale_ja, nil
+	case "ko":
+		return Locale_ko, nil
+	case "nb":
+		return Locale_nb, nil
+	case "nl":
+		return Locale_nl, nil
+	case "pl":
+		return Locale_pl, nil
+	case "pt", "pt_br":
+		return Locale_pt_BR, nil
+	case "ro":
+		return Locale_ro, nil
+	case "ru":
+		return Locale_ru, nil
+	case "sk":
+		return Locale_sk, nil
+	case "sl":
+		return Locale_sl, nil
+	case "sv":
+		return Locale_sv, nil
+	case "sw":
+		return Locale_sw, nil
+	case "tr":
+		return Locale_tr, nil
+	case "uk":
+		return Locale_uk, nil
+	case "zh", "zh_cn":
+		return Locale_zh_CN, nil
+	case "zh_tw":
+		return Locale_zh_TW, nil
+	default:
+		return "", fmt.Errorf("unsupported locale: %s", s)
+	}
+}
