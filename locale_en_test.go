@@ -74,6 +74,12 @@ func en_TestCases() []localeTestCase {
 		{inExpr: "0 15 10 L * *", outErr: nil, outDesc: "At 10:15 AM, on the last day of the month"},
 		{inExpr: "0 0 0 L-5 * ?", outErr: nil, outDesc: "At 12:00 AM, 5 days before the last day of the month"},
 
+		// DOWStartsAtOne
+		{inExpr: "23 12 * * 1#2", outErr: nil, outDesc: "At 12:23 PM, on the second Sunday of the month", isDOWStartsAtOne: true},
+		{inExpr: "* * * ? * 2-6/2", outErr: nil, outDesc: "Every second, every 2 days of the week, Monday through Friday", isDOWStartsAtOne: true},
+		{inExpr: "* * * ? * 7", outErr: nil, outDesc: "Every second, only on Saturday", isDOWStartsAtOne: true},
+		{inExpr: "* * * ? * 1,2,3,4,5", outErr: nil, outDesc: "Every second, only on Sunday, Monday, Tuesday, Wednesday, and Thursday", isDOWStartsAtOne: true},
+
 		// Non-trivial
 		{inExpr: "*/5 15 * * MON-FRI", outErr: nil, outDesc: "Every 5 minutes, between 03:00 PM and 03:59 PM, Monday through Friday"},
 		{inExpr: "* * * * MON#1", outErr: nil, outDesc: "Every minute, on the first Monday of the month"},
