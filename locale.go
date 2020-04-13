@@ -46,10 +46,10 @@ var (
 		Locale_de,
 		Locale_en,
 		Locale_es,
-		// Locale_fa,
+		Locale_fa,
 		Locale_fi,
 		Locale_fr,
-		// Locale_he,
+		Locale_he,
 		Locale_it,
 		Locale_ja,
 		Locale_ko,
@@ -57,16 +57,16 @@ var (
 		Locale_nl,
 		Locale_pl,
 		Locale_pt_BR,
-		// Locale_ro,
-		// Locale_ru,
+		Locale_ro,
+		Locale_ru,
 		Locale_sk,
 		Locale_sl,
 		Locale_sv,
 		Locale_sw,
 		Locale_tr,
-		// Locale_uk,
-		// Locale_zh_CN,
-		// Locale_zh_TW,
+		Locale_uk,
+		Locale_zh_CN,
+		Locale_zh_TW,
 	}
 )
 
@@ -113,14 +113,14 @@ func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 		rawData = i18n.Locale_en
 	case Locale_es:
 		rawData = i18n.Locale_es
-	// case Locale_fa: // TODO: Need help from Farsi translator
-	// 	rawData = i18n.Locale_fa
+	case Locale_fa:
+		rawData = i18n.Locale_fa
 	case Locale_fi:
 		rawData = i18n.Locale_fi
 	case Locale_fr:
 		rawData = i18n.Locale_fr
-	// case Locale_he: // TODO: Need help from Hebrew translator
-	// 	rawData = i18n.Locale_he
+	case Locale_he:
+		rawData = i18n.Locale_he
 	case Locale_it:
 		rawData = i18n.Locale_it
 	case Locale_ja:
@@ -135,10 +135,10 @@ func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 		rawData = i18n.Locale_pl
 	case Locale_pt_BR:
 		rawData = i18n.Locale_pt_BR
-	// case Locale_ro: // TODO: Need help from Romanian translator
-	// 	rawData = i18n.Locale_ro
-	// case Locale_ru: // TODO: Need help from Russian translator
-	// 	rawData = i18n.Locale_ru
+	case Locale_ro:
+		rawData = i18n.Locale_ro
+	case Locale_ru:
+		rawData = i18n.Locale_ru
 	case Locale_sk:
 		rawData = i18n.Locale_sk
 	case Locale_sl:
@@ -149,12 +149,12 @@ func newLocaleLoader(typ LocaleType) (loaders []Locale, err error) {
 		rawData = i18n.Locale_sw
 	case Locale_tr:
 		rawData = i18n.Locale_tr
-	// case Locale_uk: // TODO: Need help from Ukrainian translator
-	// 	rawData = i18n.Locale_uk
-	// case Locale_zh_CN: // TODO: Need help from Chinese translator
-	// 	rawData = i18n.Locale_zh_CN
-	// case Locale_zh_TW: // TODO: Need help from Chinese translator
-	// 	rawData = i18n.Locale_zh_TW
+	case Locale_uk:
+		rawData = i18n.Locale_uk
+	case Locale_zh_CN:
+		rawData = i18n.Locale_zh_CN
+	case Locale_zh_TW:
+		rawData = i18n.Locale_zh_TW
 	case LocaleAll:
 		loaders = make([]Locale, 0, len(allLocales))
 		for _, l := range allLocales {

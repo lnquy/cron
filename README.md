@@ -111,7 +111,8 @@ By default, `ExpressionDescriptor` always load the `Locale_en`. If you passes an
 - [X] Port and pass all test cases from cRonstrue
 - [X] i18n for 25 languages
 - [X] Test cases i18n
-- [ ] Fix i18n issues of FA, HE, RO, RU, UK, ZH_CN and ZH_TW
+- [x] Fix i18n issues of FA, HE, RO, RU, UK, ZH_CN and ZH_TW
+- [x] hcron CLI tool
 - [ ] Performance improvement
 - [ ] Release v1.0
 

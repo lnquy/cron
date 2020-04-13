@@ -8,15 +8,15 @@ import (
 
 var (
 	testLocales = map[LocaleType][]localeTestCase{
-		Locale_cs: cs_TestCases(),
-		Locale_da: da_TestCases(),
-		Locale_de: de_TestCases(),
-		Locale_en: en_TestCases(),
-		Locale_es: es_TestCases(),
-		// Locale_fa: fa_TestCases(), // TODO: Need help from Farsi translator
-		Locale_fi: fi_TestCases(),
-		Locale_fr: fr_TestCases(),
-		// Locale_he: he_TestCases(), // TODO: Need help from Hebrew translator
+		Locale_cs:    cs_TestCases(),
+		Locale_da:    da_TestCases(),
+		Locale_de:    de_TestCases(),
+		Locale_en:    en_TestCases(),
+		Locale_es:    es_TestCases(),
+		Locale_fa:    fa_TestCases(),
+		Locale_fi:    fi_TestCases(),
+		Locale_fr:    fr_TestCases(),
+		Locale_he:    he_TestCases(),
 		Locale_it:    it_TestCases(),
 		Locale_ja:    ja_TestCases(),
 		Locale_ko:    ko_TestCases(),
@@ -24,16 +24,16 @@ var (
 		Locale_nl:    nl_TestCases(),
 		Locale_pl:    pl_TestCases(),
 		Locale_pt_BR: pt_BR_TestCases(),
-		// Locale_ru: ru_TestCases(), // TODO: Need help from Russian translator
-		// Locale_ro: ro_TestCases(), // TODO: Need help from Romanian translator
-		Locale_sk: sk_TestCases(),
-		Locale_sl: sl_TestCases(),
-		Locale_sv: sv_TestCases(),
-		Locale_sw: sw_TestCases(),
-		Locale_tr: tr_TestCases(),
-		// Locale_uk: uk_TestCases(), // TODO: Need help from Romanian translator
-		// Locale_zh_CN: zh_CN_TestCases(), // TODO: Need help from Chinese translator
-		// Locale_zh_TW: zh_TW_TestCases(), // TODO: Need help from Chinese translator
+		Locale_ru:    ru_TestCases(),
+		Locale_ro:    ro_TestCases(),
+		Locale_sk:    sk_TestCases(),
+		Locale_sl:    sl_TestCases(),
+		Locale_sv:    sv_TestCases(),
+		Locale_sw:    sw_TestCases(),
+		Locale_tr:    tr_TestCases(),
+		Locale_uk:    uk_TestCases(),
+		Locale_zh_CN: zh_CN_TestCases(),
+		Locale_zh_TW: zh_TW_TestCases(),
 	}
 )
 
