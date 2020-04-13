@@ -377,7 +377,7 @@ func (e *ExpressionDescriptor) getYearDescription(exprParts []string, locale Loc
 		exprParts[6],
 		"",
 		func(s string) string {
-			return s // TODO
+			return s // Note: Not handle the cases when year is not in full, e.g.: 93, 99
 		},
 		func(s string) string {
 			return sprintf(locale.GetString(commaEveryX0Years), s)
