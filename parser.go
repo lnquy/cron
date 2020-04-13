@@ -166,6 +166,9 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 	// Normalized DOW: 0=Sunday/6=Saturday
 	dowRunes := []rune(dayOfWeek)
 	for i, c := range dowRunes {
+		if c == '/' || c == '#' { // Keep days after # and / as it is
+			break
+		}
 		if c < zeroRune || c > sevenRune {
 			continue
 		}

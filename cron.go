@@ -91,9 +91,10 @@ func (e *ExpressionDescriptor) ToDescription(expr string, loc LocaleType) (desc 
 	desc = transformVerbosity(desc, locale, e.isVerbose)
 	desc = strings.Join(strings.Fields(desc), " ")
 	desc = strings.ReplaceAll(desc, " ,", ",")
-	desc = strings.ToUpper(desc[:1]) + desc[1:]
+	runes := []rune(desc)
+	runes[0] = []rune(strings.ToUpper(string(runes[0])))[0]
 
-	return desc, nil
+	return string(runes), nil
 }
 
 func (e *ExpressionDescriptor) log(format string, v ...interface{}) {
@@ -376,7 +377,7 @@ func (e *ExpressionDescriptor) getYearDescription(exprParts []string, locale Loc
 		exprParts[6],
 		"",
 		func(s string) string {
-			return s // TODO
+			return s // Note: Not handle the cases when year is not in full, e.g.: 93, 99
 		},
 		func(s string) string {
 			return sprintf(locale.GetString(commaEveryX0Years), s)
@@ -431,7 +432,7 @@ func formatTime(hour, minute, second string, locale Locale, isUse24HourTimeForma
 	minute = fmt.Sprintf("%02d", minuteInt)
 	ret := ""
 	if isPeriodBeforeTime {
-		ret += period
+		ret += period + " "
 	}
 	ret += hour + ":" + minute
 	if second != "" {
