@@ -60,7 +60,6 @@ Examples:
 
 	// Run in piped mode, read from the stdin until reaching EOF
 	if isPiped {
-		fmt.Printf("piped\n")
 		if err := stream(exprDesc, locale, bufio.NewReader(os.Stdin)); err != nil {
 			fmt.Printf("error: %s", err)
 			os.Exit(1)
@@ -71,7 +70,6 @@ Examples:
 	// Run in standalone mode
 	// Read from crontab input file
 	if strings.TrimSpace(fInputFilePath) != "" {
-		fmt.Printf("file\n")
 		f, err := os.OpenFile(fInputFilePath, os.O_RDONLY, os.ModePerm)
 		if err != nil {
 			fmt.Printf("failed to open file: %s", err)
@@ -89,7 +87,6 @@ Examples:
 		os.Exit(1)
 	}
 
-	fmt.Printf("param\n")
 	// Get description for the last cmd parameter
 	expr := os.Args[len(os.Args)-1]
 	desc, err := exprDesc.ToDescription(expr, locale)
