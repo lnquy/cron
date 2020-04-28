@@ -270,22 +270,46 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 // TODO: Regex is really expensive here. Improve it
 func (p *cronParser) validate(exprParts []string) (err error) {
 	// Second
-	matches := numberRegex.FindAllString(exprParts[0], -1)
+	getNumbersFunc := func(s string) (numbers []string) {
+		runes := []rune(s)
+		var num []rune
+		for _, r := range runes {
+			if r >= '0' && r <= '9' {
+				num = append(num, r)
+			} else {
+				if len(num) > 0 {
+					numbers = append(numbers, string(num))
+					num = make([]rune, 0)
+				}
+			}
+		}
+		return numbers
+	}
+
+	// Year
+	// Check year first to reduce bound checking
+	matches := getNumbersFunc(exprParts[6])
+	if !isValidNumbers(matches, 1, 2099) {
+		return fmt.Errorf("year contains invalid values: %w", InvalidExprYearError)
+	}
+
+	// Second
+	matches = getNumbersFunc(exprParts[0])
 	if !isValidNumbers(matches, 0, 59) {
 		return fmt.Errorf("second contains invalid values: %w", InvalidExprSecondError)
 	}
 	// Minute
-	matches = numberRegex.FindAllString(exprParts[1], -1)
+	matches = getNumbersFunc(exprParts[1])
 	if !isValidNumbers(matches, 0, 59) {
 		return fmt.Errorf("minute contains invalid values: %w", InvalidExprMinuteError)
 	}
 	// Hour
-	matches = numberRegex.FindAllString(exprParts[2], -1)
+	matches = getNumbersFunc(exprParts[2])
 	if !isValidNumbers(matches, 0, 23) {
 		return fmt.Errorf("hour contains invalid values: %w", InvalidExprHourError)
 	}
 	// Day of month
-	matches = numberRegex.FindAllString(exprParts[3], -1)
+	matches = getNumbersFunc(exprParts[3])
 	if !isValidNumbers(matches, 1, 31) {
 		return fmt.Errorf("DOM contains invalid values: %w", InvalidExprDayOfMonthError)
 	}
@@ -293,22 +317,17 @@ func (p *cronParser) validate(exprParts []string) (err error) {
 		return fmt.Errorf("DOM contains invalid values: %w", InvalidExprDayOfMonthError)
 	}
 	// Month
-	matches = numberRegex.FindAllString(exprParts[4], -1)
+	matches = getNumbersFunc(exprParts[4])
 	if !isValidNumbers(matches, 1, 12) {
 		return fmt.Errorf("month contains invalid values: %w", InvalidExprMonthError)
 	}
 	// Day of week
-	matches = numberRegex.FindAllString(exprParts[5], -1)
+	matches = getNumbersFunc(exprParts[5])
 	if !isValidNumbers(matches, 0, 6) {
 		return fmt.Errorf("DOW contains invalid values: %w", InvalidExprDayOfWeekError)
 	}
 	if invalidCharsDOWDOMRegex.MatchString(exprParts[5]) { // DOW
 		return fmt.Errorf("DOW contains invalid values: %w", InvalidExprDayOfWeekError)
-	}
-	// Year
-	matches = numberRegex.FindAllString(exprParts[6], -1)
-	if !isValidNumbers(matches, 1, 2099) {
-		return fmt.Errorf("year contains invalid values: %w", InvalidExprYearError)
 	}
 
 	return nil

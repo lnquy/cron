@@ -17,3 +17,6 @@
 # IDEs
 .idea/
 .vscode/
+
+# Profiling
+*.pprof
