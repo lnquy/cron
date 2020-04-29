@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"regexp"
@@ -267,21 +268,24 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 	return nil
 }
 
-// TODO: Regex is really expensive here. Improve it
 func (p *cronParser) validate(exprParts []string) (err error) {
 	// Second
+	buf := bytes.NewBuffer(make([]byte, 0, 8))
 	getNumbersFunc := func(s string) (numbers []string) {
-		runes := []rune(s)
-		var num []rune
-		for _, r := range runes {
-			if r >= '0' && r <= '9' {
-				num = append(num, r)
+		for _, b := range s {
+			if b >= '0' && b <= '9' {
+				_, _ = buf.WriteRune(b)
 			} else {
-				if len(num) > 0 {
-					numbers = append(numbers, string(num))
-					num = make([]rune, 0)
+				if buf.Len() > 0 {
+					numbers = append(numbers, buf.String())
+					buf.Reset()
 				}
 			}
+		}
+
+		if buf.Len() > 0 {
+			numbers = append(numbers, buf.String())
+			buf.Reset()
 		}
 		return numbers
 	}
