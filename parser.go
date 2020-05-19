@@ -29,8 +29,6 @@ var (
 	rangeRegex = regexp.MustCompile(`^[*\-,]`)
 
 	invalidCharsDOWDOMRegex = regexp.MustCompile(`[a-km-vx-zA-KM-VX-Z]`)
-
-	numberRegex = regexp.MustCompile(`(\d+)`)
 )
 
 var (
@@ -269,7 +267,7 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 }
 
 func (p *cronParser) validate(exprParts []string) (err error) {
-	// Second
+	// Extract the numbers from s string
 	buf := bytes.NewBuffer(make([]byte, 0, 8))
 	getNumbersFunc := func(s string) (numbers []string) {
 		for _, b := range s {
@@ -337,11 +335,11 @@ func (p *cronParser) validate(exprParts []string) (err error) {
 	return nil
 }
 
+// isValidNumbers checks if all the numbers in the list is in range (lowerBound, upperBound).
 func isValidNumbers(matches []string, lowerBound, upperBound int) bool {
 	for _, m := range matches {
 		num, err := strconv.Atoi(m)
 		if err != nil {
-			// TODO: verbose
 			return false
 		}
 		if num < lowerBound || num > upperBound {
