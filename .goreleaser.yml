@@ -33,11 +33,17 @@ builds:
 
 archives:
   - id: hcron
-    builds: hcron
+    builds:
+    - hcron
     name_template: "hcron_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     replacements:
       386: i386
       amd64: x86_64
+    files:
+      - LICENSE*
+      - README*
+      - CHANGELOG*
+
 checksum:
   name_template: 'checksums.txt'
 snapshot:
