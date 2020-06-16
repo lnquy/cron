@@ -32,10 +32,10 @@ builds:
     skip: false
 
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
+  - id: hcron
+    builds: hcron
+    name_template: "hcron_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    replacements:
       386: i386
       amd64: x86_64
 checksum:
