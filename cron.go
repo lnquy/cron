@@ -88,7 +88,7 @@ func (e *ExpressionDescriptor) ToDescription(expr string, loc LocaleType) (desc 
 	desc = timeSegment + dayOfMonthDesc + dayOfWeekDesc + monthDesc + yearDesc
 	desc = transformVerbosity(desc, locale, e.isVerbose)
 	desc = strings.Join(strings.Fields(desc), " ")
-	desc = strings.ReplaceAll(desc, " ,", ",")
+	desc = strings.Replace(desc, " ,", ",", -1)
 	runes := []rune(desc)
 	runes[0] = []rune(strings.ToUpper(string(runes[0])))[0]
 
@@ -619,9 +619,9 @@ func transformVerbosity(desc string, locale Locale, isVerbose bool) string {
 	eMinute := locale.GetString(everyMinute)
 	eHour := locale.GetString(everyHour)
 	eDay := locale.GetString(commaEveryDay)
-	desc = strings.ReplaceAll(desc, ", "+eMinute, "")
-	desc = strings.ReplaceAll(desc, ", "+eHour, "")
-	desc = strings.ReplaceAll(desc, eDay, "")
+	desc = strings.Replace(desc, ", "+eMinute, "", -1)
+	desc = strings.Replace(desc, ", "+eHour, "", -1)
+	desc = strings.Replace(desc, eDay, "", -1)
 	return desc
 }
 
