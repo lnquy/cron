@@ -15,7 +15,7 @@ builds:
       - --trimpath
       - -v
     ldflags:
-      - -s -w -X main.build={{.Version}}
+      - -s -w -X main.version={{.Version}}
     env:
       - CGO_ENABLED=0
     goos:

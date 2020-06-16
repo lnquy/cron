@@ -20,3 +20,6 @@
 
 # Profiling
 *.pprof
+
+# Goreleaser
+dist/
