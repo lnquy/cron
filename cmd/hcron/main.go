@@ -13,11 +13,15 @@ import (
 )
 
 var (
+	version string // Will be injected at build time
+
 	fLocale               string
 	fInputFilePath        string
 	fDayOfWeekStartsAtOne bool
 	fUse24HourTimeFormat  bool
 	fVerbose              bool
+	fVersion              bool
+	fHelp                 bool
 
 	acceptedCharsRegex = regexp.MustCompile(`^[wWlL /?,*#\-0-9]*$`)
 )
@@ -28,12 +32,21 @@ func init() {
 	flag.BoolVar(&fDayOfWeekStartsAtOne, "dow-starts-at-one", false, "Is day of the week starts at 1 (Monday-Sunday: 1-7)")
 	flag.BoolVar(&fUse24HourTimeFormat, "24-hour", false, "Output description in 24 hour time format")
 	flag.BoolVar(&fVerbose, "verbose", false, "Output description in verbose format")
+	flag.BoolVar(&fVersion, "v", false, "Print app version then exit")
+	flag.BoolVar(&fHelp, "h", false, "Print help then exit")
 }
 
 func main() {
 	flag.Usage = func() {
+		_, _ = fmt.Fprint(os.Stderr, `hcron converts the CRON expression to human readable description.
+
+Usage:
+  hcron [flags] [cron expression]
+
+Flags:
+`)
 		flag.PrintDefaults()
-		fmt.Println(`
+		_, _ = fmt.Fprintf(os.Stderr, `
 Examples:
   $ hcron "0 15 * * 1-5"
   $ hcron "0 */10 9 * * 1-5 2020"
@@ -42,7 +55,19 @@ Examples:
   $ another-app | hcron 
   $ another-app | hcron --dow-starts-at-one --24-hour -locale es`)
 	}
+
 	flag.Parse()
+
+	// Print help
+	if fHelp {
+		flag.Usage()
+		return
+	}
+	// Print app version
+	if fVersion {
+		fmt.Println(version)
+		return
+	}
 
 	exprDesc, locale, err := getExpressionDescriptor()
 	if err != nil {

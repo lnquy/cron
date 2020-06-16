@@ -14,9 +14,17 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Binaries
+cron
+*.bin
+cmd/hcron/hcron
+
 # IDEs
 .idea/
 .vscode/
 
 # Profiling
 *.pprof
+
+# Goreleaser
+dist/
