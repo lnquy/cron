@@ -68,11 +68,15 @@ type (
 		isDOWStartsAtOne bool
 	}
 
+	// Parser represents the cron parser.
 	Parser interface {
 		Parse(expr string) (exprParts []string, err error)
 	}
 )
 
+// Parse parses, normalizes and validates the CRON expression.
+// If the CRON expression is valid, then the returned list always the normalized 7-part-CRON format.
+// Example: "* 5 * * *" => ["", "*", "5", "*", "*", "*", ""]
 func (p *cronParser) Parse(expr string) (exprParts []string, err error) {
 	exprParts, err = p.extractExprParts(expr)
 	if err != nil {
@@ -102,7 +106,7 @@ func (p *cronParser) extractExprParts(expr string) (exprParts []string, err erro
 	case len(parts) < 5:
 		return nil, fmt.Errorf("expression has only %d part(s), at least 5 parts required: %w", len(parts), InvalidExprError)
 	case len(parts) == 5:
-		// Expression has 5 parts (standard POSIX cron)
+		// Expression has 5 parts (standard POSIX CRON)
 		// => Prepend 1 and append 1 empty part at the beginning and the end of exprParts
 		copy(exprParts[1:], append(parts, ""))
 	case len(parts) == 6:

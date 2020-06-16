@@ -14,20 +14,8 @@ var (
 	lastDayOffsetRegex  = regexp.MustCompile(`l-(\d{1,2})`)
 )
 
-func containsAny(s string, matches []rune) bool {
-	runes := []rune(s)
-	for _, r := range runes {
-		for _, c := range matches {
-			if r == c {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
 type (
+	// ExpressionDescriptor represents the CRON expression descriptor.
 	ExpressionDescriptor struct {
 		isVerbose          bool
 		isDOWStartsAtOne   bool
@@ -38,13 +26,18 @@ type (
 		locales map[LocaleType]Locale
 	}
 
+	// Logger is the logging interface for expression descriptor.
 	Logger interface {
 		Printf(format string, v ...interface{})
 	}
 
+	// Option allows to configure expression descriptor.
 	Option func(exprDesc *ExpressionDescriptor)
 )
 
+// NewDescriptor returns a new CRON expression descriptor based on the list of options.
+// If no options provided, a default CRON expression descriptor will be returned instead.
+// By default, English (Locale_en) will always be loaded.
 func NewDescriptor(options ...Option) (exprDesc *ExpressionDescriptor, err error) {
 	exprDesc = &ExpressionDescriptor{}
 	for _, option := range options {
@@ -73,6 +66,11 @@ func NewDescriptor(options ...Option) (exprDesc *ExpressionDescriptor, err error
 	return exprDesc, nil
 }
 
+// ToDescription converts the CRON expression to the human readable string in specified locale.
+// If the specified locale had not been loaded by the CRON expression descriptor, the result will be
+// returned in English (Locale_en) by default.
+//
+// To configure supported locales of the CRON expression descriptor, please see the SetLocales() option.
 func (e *ExpressionDescriptor) ToDescription(expr string, loc LocaleType) (desc string, err error) {
 	var exprParts []string
 	if exprParts, err = e.parser.Parse(expr); err != nil {
@@ -406,6 +404,19 @@ func (e *ExpressionDescriptor) getLocale(loc LocaleType) Locale {
 		return e.locales[Locale_en] // Fall back to default
 	}
 	return v
+}
+
+func containsAny(s string, matches []rune) bool {
+	runes := []rune(s)
+	for _, r := range runes {
+		for _, c := range matches {
+			if r == c {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func formatTime(hour, minute, second string, locale Locale, isUse24HourTimeFormat bool) string {
