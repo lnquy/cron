@@ -125,7 +125,7 @@ func stream(exprDesc *cron.ExpressionDescriptor, locType cron.LocaleType, reader
 		}
 
 		expr, remaining := normalize(string(line))
-		if expr == "" { // Not a parse-able cron expression
+		if expr == "" { // Not a parse-able CRON expression
 			continue
 		}
 
@@ -155,11 +155,11 @@ func normalize(line string) (expr string, remainder string) {
 	}
 
 	// Line contains invalid chars => Assume it's in crontab format
-	// First 5 parts is the cron expression, the remaining is user and commands
+	// First 5 parts is the CRON expression, the remaining is user and commands
 	if !acceptedCharsRegex.MatchString(line) {
 		return strings.Join(parts[:5], " "), strings.Join(parts[5:], " ")
 	}
 
-	// Only contains accepted cron characters => Assume valid cron expression
+	// Only contains accepted CRON characters => Assume valid CRON expression
 	return line, ""
 }

@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"regexp"
@@ -28,8 +29,6 @@ var (
 	rangeRegex = regexp.MustCompile(`^[*\-,]`)
 
 	invalidCharsDOWDOMRegex = regexp.MustCompile(`[a-km-vx-zA-KM-VX-Z]`)
-
-	numberRegex = regexp.MustCompile(`(\d+)`)
 )
 
 var (
@@ -69,11 +68,15 @@ type (
 		isDOWStartsAtOne bool
 	}
 
+	// Parser represents the cron parser.
 	Parser interface {
 		Parse(expr string) (exprParts []string, err error)
 	}
 )
 
+// Parse parses, normalizes and validates the CRON expression.
+// If the CRON expression is valid, then the returned list always the normalized 7-part-CRON format.
+// Example: "* 5 * * *" => ["", "*", "5", "*", "*", "*", ""]
 func (p *cronParser) Parse(expr string) (exprParts []string, err error) {
 	exprParts, err = p.extractExprParts(expr)
 	if err != nil {
@@ -103,7 +106,7 @@ func (p *cronParser) extractExprParts(expr string) (exprParts []string, err erro
 	case len(parts) < 5:
 		return nil, fmt.Errorf("expression has only %d part(s), at least 5 parts required: %w", len(parts), InvalidExprError)
 	case len(parts) == 5:
-		// Expression has 5 parts (standard POSIX cron)
+		// Expression has 5 parts (standard POSIX CRON)
 		// => Prepend 1 and append 1 empty part at the beginning and the end of exprParts
 		copy(exprParts[1:], append(parts, ""))
 	case len(parts) == 6:
@@ -267,25 +270,52 @@ func (p *cronParser) normalize(exprParts []string) (err error) {
 	return nil
 }
 
-// TODO: Regex is really expensive here. Improve it
 func (p *cronParser) validate(exprParts []string) (err error) {
+	// Extract the numbers from s string
+	buf := bytes.NewBuffer(make([]byte, 0, 8))
+	getNumbersFunc := func(s string) (numbers []string) {
+		for _, b := range s {
+			if b >= '0' && b <= '9' {
+				_, _ = buf.WriteRune(b)
+			} else {
+				if buf.Len() > 0 {
+					numbers = append(numbers, buf.String())
+					buf.Reset()
+				}
+			}
+		}
+
+		if buf.Len() > 0 {
+			numbers = append(numbers, buf.String())
+			buf.Reset()
+		}
+		return numbers
+	}
+
+	// Year
+	// Check year first to reduce bound checking
+	matches := getNumbersFunc(exprParts[6])
+	if !isValidNumbers(matches, 1, 2099) {
+		return fmt.Errorf("year contains invalid values: %w", InvalidExprYearError)
+	}
+
 	// Second
-	matches := numberRegex.FindAllString(exprParts[0], -1)
+	matches = getNumbersFunc(exprParts[0])
 	if !isValidNumbers(matches, 0, 59) {
 		return fmt.Errorf("second contains invalid values: %w", InvalidExprSecondError)
 	}
 	// Minute
-	matches = numberRegex.FindAllString(exprParts[1], -1)
+	matches = getNumbersFunc(exprParts[1])
 	if !isValidNumbers(matches, 0, 59) {
 		return fmt.Errorf("minute contains invalid values: %w", InvalidExprMinuteError)
 	}
 	// Hour
-	matches = numberRegex.FindAllString(exprParts[2], -1)
+	matches = getNumbersFunc(exprParts[2])
 	if !isValidNumbers(matches, 0, 23) {
 		return fmt.Errorf("hour contains invalid values: %w", InvalidExprHourError)
 	}
 	// Day of month
-	matches = numberRegex.FindAllString(exprParts[3], -1)
+	matches = getNumbersFunc(exprParts[3])
 	if !isValidNumbers(matches, 1, 31) {
 		return fmt.Errorf("DOM contains invalid values: %w", InvalidExprDayOfMonthError)
 	}
@@ -293,32 +323,27 @@ func (p *cronParser) validate(exprParts []string) (err error) {
 		return fmt.Errorf("DOM contains invalid values: %w", InvalidExprDayOfMonthError)
 	}
 	// Month
-	matches = numberRegex.FindAllString(exprParts[4], -1)
+	matches = getNumbersFunc(exprParts[4])
 	if !isValidNumbers(matches, 1, 12) {
 		return fmt.Errorf("month contains invalid values: %w", InvalidExprMonthError)
 	}
 	// Day of week
-	matches = numberRegex.FindAllString(exprParts[5], -1)
+	matches = getNumbersFunc(exprParts[5])
 	if !isValidNumbers(matches, 0, 6) {
 		return fmt.Errorf("DOW contains invalid values: %w", InvalidExprDayOfWeekError)
 	}
 	if invalidCharsDOWDOMRegex.MatchString(exprParts[5]) { // DOW
 		return fmt.Errorf("DOW contains invalid values: %w", InvalidExprDayOfWeekError)
 	}
-	// Year
-	matches = numberRegex.FindAllString(exprParts[6], -1)
-	if !isValidNumbers(matches, 1, 2099) {
-		return fmt.Errorf("year contains invalid values: %w", InvalidExprYearError)
-	}
 
 	return nil
 }
 
+// isValidNumbers checks if all the numbers in the list is in range (lowerBound, upperBound).
 func isValidNumbers(matches []string, lowerBound, upperBound int) bool {
 	for _, m := range matches {
 		num, err := strconv.Atoi(m)
 		if err != nil {
-			// TODO: verbose
 			return false
 		}
 		if num < lowerBound || num > upperBound {

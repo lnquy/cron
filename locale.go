@@ -74,6 +74,8 @@ type (
 	LocaleType string
 	LocaleKey  string
 
+	// Locale is the interface to a specific i18n.
+	// The methods of Locale interface returns the corresponding i18n of a specific key.
 	Locale interface {
 		GetLocaleType() (typ LocaleType)
 		GetBool(key LocaleKey) (value bool)
@@ -81,6 +83,7 @@ type (
 		GetSlice(key LocaleKey) (values []string)
 	}
 
+	// LocaleLoader holds the map of i18n strings in a specific language (localType).
 	LocaleLoader struct {
 		localeType LocaleType
 		data       map[string]interface{}
