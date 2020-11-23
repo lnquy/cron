@@ -143,6 +143,8 @@ Flags:
   -h    Print help then exit
   -locale string
         Output description in which locale (default "en")
+  -print-all
+        Also print all the lines which is not a valid cron
   -v    Print app version then exit
   -verbose
         Output description in verbose format
