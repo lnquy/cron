@@ -20,6 +20,7 @@ var (
 	fDayOfWeekStartsAtOne bool
 	fUse24HourTimeFormat  bool
 	fVerbose              bool
+	fPrintAll             bool
 	fVersion              bool
 	fHelp                 bool
 
@@ -32,6 +33,7 @@ func init() {
 	flag.BoolVar(&fDayOfWeekStartsAtOne, "dow-starts-at-one", false, "Is day of the week starts at 1 (Monday-Sunday: 1-7)")
 	flag.BoolVar(&fUse24HourTimeFormat, "24-hour", false, "Output description in 24 hour time format")
 	flag.BoolVar(&fVerbose, "verbose", false, "Output description in verbose format")
+	flag.BoolVar(&fPrintAll, "print-all", false, "Print all lines which is not a valid cron")
 	flag.BoolVar(&fVersion, "v", false, "Print app version then exit")
 	flag.BoolVar(&fHelp, "h", false, "Print help then exit")
 }
@@ -171,11 +173,17 @@ func stream(exprDesc *cron.ExpressionDescriptor, locType cron.LocaleType, reader
 
 func normalize(line string) (expr string, remainder string) {
 	if strings.HasPrefix(line, "#") {
+		if fPrintAll {
+			fmt.Printf("%s\n", line)
+		}
 		return "", line
 	}
 
 	parts := strings.Fields(line)
 	if len(parts) < 5 {
+		if fPrintAll {
+			fmt.Printf("%s\n", line)
+		}
 		return "", line
 	}
 
