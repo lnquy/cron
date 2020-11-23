@@ -33,7 +33,7 @@ func init() {
 	flag.BoolVar(&fDayOfWeekStartsAtOne, "dow-starts-at-one", false, "Is day of the week starts at 1 (Monday-Sunday: 1-7)")
 	flag.BoolVar(&fUse24HourTimeFormat, "24-hour", false, "Output description in 24 hour time format")
 	flag.BoolVar(&fVerbose, "verbose", false, "Output description in verbose format")
-	flag.BoolVar(&fPrintAll, "print-all", false, "Print all lines which is not a valid cron")
+	flag.BoolVar(&fPrintAll, "print-all", false, "Also print all the lines which is not a valid cron")
 	flag.BoolVar(&fVersion, "v", false, "Print app version then exit")
 	flag.BoolVar(&fHelp, "h", false, "Print help then exit")
 }
